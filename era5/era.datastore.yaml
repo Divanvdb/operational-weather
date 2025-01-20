@@ -1,0 +1,93 @@
+schema_version: v0.5.0
+dataset_version: v0.1.0
+
+output:
+  variables:
+    static: [grid_index, static_feature]
+    state: [time, grid_index, state_feature]
+    forcing: [time, grid_index, forcing_feature]
+  coord_ranges:
+    time:
+      start: 2010-01-01T00:00
+      end: 2019-12-31T00:00
+      step: PT6H
+  chunking:
+    time: 1
+  splitting:
+    dim: time
+    splits:
+      train:
+        start: 2010-01-01T00:00
+        end: 2017-06-01T00:00
+        compute_statistics:
+          ops: [mean, std, diff_mean, diff_std]
+          dims: [grid_index, time]
+      val:
+        start: 2017-07-01T00:00
+        end: 2018-11-01T00:00
+      test:
+        start: 2018-12-01T00:00
+        end: 2019-12-31T00:00
+
+inputs:
+  era_variables:
+    path: C:\Users\23603526\Documents\GitHub\neural-lam-Divan\era5\era5_2010_2019_xy.nc
+    dims: [time, x, y, pressure_level]
+    variables:
+      - z
+      - r
+      - t
+      - u
+      - v
+      - w
+      - wind_speed
+
+    dim_mapping:
+      time:
+        method: rename
+        dim: time
+      state_feature:
+        method: stack_variables_by_var_name
+        dims: [pressure_level]
+        name_format: "{var_name}{pressure_level}hPa"
+      grid_index:
+        method: stack
+        dims: [x, y]
+    target_output_variable: state
+
+  era_times:
+    path: C:\Users\23603526\Documents\GitHub\neural-lam-Divan\era5\era5_2010_2019_xy.nc
+    dims: [time, x, y, pressure_level]
+    variables:
+
+      - hour
+      - month
+
+    dim_mapping:
+      time:
+        method: rename
+        dim: time
+      forcing_feature:
+        method: stack_variables_by_var_name
+        name_format: "{var_name}"
+      grid_index:
+        method: stack
+        dims: [x, y]
+    target_output_variable: forcing
+
+  era_lsm:
+    path: C:\Users\23603526\Documents\GitHub\neural-lam-Divan\era5\era5_2010_2019_xy.nc
+    dims: [time, x, y, pressure_level]
+
+    variables:
+      - lsm
+
+    dim_mapping:
+      grid_index:
+        method: stack
+        dims: [x, y]
+      static_feature:
+        method: stack_variables_by_var_name
+        name_format: "{var_name}"
+    target_output_variable: static
+
