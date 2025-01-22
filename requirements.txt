@@ -1,0 +1,16 @@
+dataclass-wizard
+loguru
+numpy
+plotly
+pytorch-lightning
+torch
+torch-geometric
+tqdm
+xarray
+zarr
+netCDF4
+tueplots
+cartopy
+mllam_data_prep
+parse
+wandb

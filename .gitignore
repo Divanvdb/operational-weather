@@ -1,3 +1,4 @@
 data/era5_2010_2020_xy.nc
 wandb/
 __pycache__/
+saved_models/
