@@ -91,3 +91,17 @@ inputs:
         name_format: "{var_name}"
     target_output_variable: static
 
+schema_version: "1.0"  
+
+dataset_version: "1.0"
+
+extra:
+  projection:
+    class_name: LambertConformal
+    kwargs:
+      central_longitude: 24.0 
+      central_latitude: -30.0    
+      standard_parallels: [-30.0, -25.0]  
+      globe:
+        semimajor_axis: 6367470.0
+        semiminor_axis: 6367470.0
