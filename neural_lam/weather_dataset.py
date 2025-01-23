@@ -511,6 +511,7 @@ class WeatherDataset(torch.utils.data.Dataset):
         tensor: torch.Tensor,
         time: Union[datetime.datetime, list[datetime.datetime]],
         category: str,
+        use_numpy: bool = True,
     ):
         """
         Construct a xarray.DataArray from a `pytorch.Tensor` with coordinates
@@ -581,11 +582,18 @@ class WeatherDataset(torch.utils.data.Dataset):
         if add_time_as_dim:
             coords["time"] = time
 
-        da = xr.DataArray(
-            tensor.cpu().numpy(),
-            dims=dims,
-            coords=coords,
-        )
+        if use_numpy:
+            da = xr.DataArray(
+                tensor.cpu().numpy(),
+                dims=dims,
+                coords=coords,
+            )
+        else:
+            da = xr.DataArray(
+                tensor,
+                dims=dims,
+                coords=coords,
+            )
 
         for grid_coord in ["x", "y"]:
             if (

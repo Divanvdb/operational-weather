@@ -156,6 +156,7 @@ class ARModel(pl.LightningModule):
         time: Union[int, List[int]],
         split: str,
         category: str,
+        use_numpy: bool = True,
     ) -> xr.DataArray:
         """
         Create an `xr.DataArray` from a tensor, with the correct dimensions and
@@ -183,9 +184,14 @@ class ARModel(pl.LightningModule):
         # provided to ARModel or where to put plotting still needs discussion
         weather_dataset = WeatherDataset(datastore=self._datastore, split=split)
         time = np.array(time.cpu(), dtype="datetime64[ns]")
-        da = weather_dataset.create_dataarray_from_tensor(
-            tensor=tensor.cpu().numpy(), time=time, category=category
-        )
+        if use_numpy:
+            da = weather_dataset.create_dataarray_from_tensor(
+                tensor=tensor.cpu().numpy(), time=time, category=category, use_numpy=use_numpy
+            )
+        else:
+            da = weather_dataset.create_dataarray_from_tensor(
+                tensor=tensor.detach().numpy(), time=time, category=category, use_numpy=use_numpy
+            )
         return da
 
     def configure_optimizers(self):
