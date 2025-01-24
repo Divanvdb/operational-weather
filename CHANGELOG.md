@@ -18,5 +18,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Initialised the ERA5 2020 testing data and config files `test_config.yaml` and `test.datastore.yaml`
 - Added images to the `README.md` file
 - Created a new `validate_model.py` file for the evaluation phase
+- Updated the Lightning Trainer in `train_model.py` to include multi-GPU training and a profiler
 
 

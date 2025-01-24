@@ -284,13 +284,14 @@ def main(input_args=None):
     trainer = pl.Trainer(
         max_epochs=args.epochs,
         deterministic=True,
-        # strategy="ddp",
+        strategy="ddp",
         accelerator=device_name,
         logger=logger,
         log_every_n_steps=1,
         callbacks=[checkpoint_callback],
         check_val_every_n_epoch=args.val_interval,
         precision=args.precision,
+        profiler="simple",
     )
 
 
