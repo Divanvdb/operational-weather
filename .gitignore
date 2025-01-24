@@ -4,3 +4,4 @@ __pycache__/
 saved_models/
 model_settings.yaml
 predictions.ipynb
+terminal_commands.md
