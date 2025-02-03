@@ -18,15 +18,15 @@ output:
     splits:
       train:
         start: 2020-01-01T00:00
-        end: 2020-01-01T00:00
+        end: 2020-12-31T00:00
         compute_statistics:
           ops: [mean, std, diff_mean, diff_std]
           dims: [grid_index, time]
       val:
-        start: 2020-01-01T00:00
-        end: 2020-01-01T00:00
+        start: 2020-12-31T00:00
+        end: 2020-12-31T00:00
       test:
-        start: 2020-01-01T00:00
+        start: 2020-12-31T00:00
         end: 2020-12-31T00:00
 
 inputs:

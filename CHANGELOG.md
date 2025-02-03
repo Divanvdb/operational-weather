@@ -20,4 +20,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Created a new `validate_model.py` file for the evaluation phase
 - Updated the Lightning Trainer in `train_model.py` to include multi-GPU training and a profiler
 
+## [v0.1.1](https://github.com/Divanvdb/dk-neural-lam)
+
+- Remade the test datastore with `label = train` in the `test.datastore.yaml` file
+- Added a train option into the `setup` function of `weather_dataset` to create a testing datastore with unshuffled dataloader
+- Redid `validate_model.py` to produce and `output_20x7x49x69` file for weather evaluation using untrained model
+
+## TODO:
+
+- Ensure the **standardization** of the weather data is done correctly
+- Reduce `n_boundary_points=2` to `n_boundary_points=0` in `mdp.py` to ensure the model doesn't use future forcings 
+- Used trained model for the prediction of wind speed data
 

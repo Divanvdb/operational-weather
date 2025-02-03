@@ -57,61 +57,80 @@ def main(input_args=None):
     )
 
     # Setup data module for evaluation
-    data_module.setup('test')
-    test_loader = data_module.test_dataloader()
+    data_module.setup('train')
+    train_loader = data_module.train_dataloader()
 
     logger.info("Data Module Created.")
-
-
-    # Initialize the DataArray with the required dimensions and coordinates
-    output = xr.DataArray(
-        data=np.nan,  # Initialize with NaN values
-        dims=['time', 'lon', 'lat', 'prediction_timedelta'],
-        coords={
-            'time': [],  # Will be populated dynamically
-            'lon': datastore.x.values,  # Assuming lon and lat are available in pred_wind
-            'lat': datastore.y.values,
-            'prediction_timedelta': np.arange(args.ar_steps_eval),  # Lead times for predictions
-        },
-    )
+    
+    catch = True
+    count = 0
 
     logger.info("Forecast generation started.")
 
     # Iterate through the test loader
-    for i, batch in enumerate(test_loader):
-        logger.info(f"Processing batch {i}/{len(test_loader)}")
+    for i, batch in enumerate(train_loader):
+        logger.info(f"Processing batch {i}/{len(train_loader)}")
         prediction, target, _, times = model.common_step(batch)
 
         # Convert predictions and targets to DataArrays
         predictions = model._create_dataarray_from_tensor(
-            tensor=prediction[0], time=times[0], split='test', category='state', use_numpy=False
+            tensor=prediction[0], time=times[0], split='train', category='state', use_numpy=False
         )
         targets = model._create_dataarray_from_tensor(
-            tensor=target[0], time=times[0], split='test', category='state', use_numpy=False
+            tensor=target[0], time=times[0], split='train', category='state', use_numpy=False
         )
-
-        # Unstack grid coordinates
-        unstacked_pred = datastore.unstack_grid_coords(predictions)
-        unstacked_target = datastore.unstack_grid_coords(targets)
 
         # Extract wind speed at 850 hPa
-        pred_wind = unstacked_pred.sel(state_feature='wind_speed850.0hPa').drop('state_feature')
-        target_wind = unstacked_target.sel(state_feature='wind_speed850.0hPa').drop('state_feature')
+        predictions = predictions.sel(state_feature='wind_speed850.0hPa').drop_vars('state_feature')
+        targets = targets.sel(state_feature='wind_speed850.0hPa').drop_vars('state_feature')
 
-        # Create a temporary DataArray for the current batch
-        temp = xr.DataArray(
-            data=np.stack([pred_wind.values, target_wind.values], axis=0),  # Stack prediction and target
-            dims=['variable', 'time', 'lon', 'lat'],
-            coords={
-                'variable': ['prediction', 'target'],
-                'time': pred_wind.time,
-                'lon': pred_wind.lon,
-                'lat': pred_wind.lat,
-            },
-        )
+        # Unstack grid coordinates
+        predictions = datastore.unstack_grid_coords(predictions)
+        targets = datastore.unstack_grid_coords(targets)
 
-        # Append the temporary DataArray to the output DataArray
-        output = xr.concat([output, temp], dim='time')
+        # Unstandardise the predictions and targets
+        wspd_meand = data_module.train_dataset.da_state_mean.sel(state_feature='wind_speed850.0hPa').values
+        wspd_stdd = data_module.train_dataset.da_state_std.sel(state_feature='wind_speed850.0hPa').values
+
+        predictions = predictions * wspd_stdd + wspd_meand
+        targets = targets * wspd_stdd + wspd_meand
+
+
+        if catch:
+            # Initialize an empty Dataset
+            output = xr.Dataset()
+
+            # Assign coordinates
+            output.coords['time'] = predictions['time'][0].values  # Copy the time coordinate from the input
+            output.coords['prediction_timedelta'] = ('prediction_timedelta', np.arange(0, 7))  # Correct dim name
+            output.coords['lat'] = ('lat', predictions['y'].values)  # Explicitly assign dimension
+            output.coords['lon'] = ('lon', predictions['x'].values)  # Explicitly assign dimension
+
+            output['prediction'] = (('prediction_timedelta', 'lon', 'lat'), predictions.values)
+            output['target'] = (('prediction_timedelta', 'lon', 'lat'), targets.values)
+
+            catch = False
+
+        else:
+            # Init temp dataset
+            temp = xr.Dataset()
+
+            # Assign coordinates
+            temp.coords['time'] = predictions['time'][0].values  # Copy the time coordinate from the input
+            temp.coords['prediction_timedelta'] = ('prediction_timedelta', np.arange(0, 7))  # Correct dim name
+            temp.coords['lat'] = ('lat', predictions['y'].values)  # Explicitly assign dimension
+            temp.coords['lon'] = ('lon', predictions['x'].values)  # Explicitly assign dimension
+            
+            temp['prediction'] = (('prediction_timedelta', 'lon', 'lat'), predictions.values)
+            temp['target'] = (('prediction_timedelta', 'lon', 'lat'), targets.values)
+
+            # Concatenate the temp dataset to the output dataset
+            output = xr.concat([output, temp], dim='time')
+
+        count += 1
+        if count == 20:
+            break
+
 
     # Add metadata to the output DataArray
     output.attrs['description'] = 'Wind speed at 850 hPa predictions and targets'
@@ -121,4 +140,6 @@ def main(input_args=None):
     return output
 
 if __name__ == "__main__":
-    main()
+    output = main()
+
+    output.to_netcdf('output_20x7x49x69.nc')

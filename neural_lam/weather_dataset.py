@@ -634,6 +634,7 @@ class WeatherDataModule(pl.LightningDataModule):
         self.train_dataset = None
         self.val_dataset = None
         self.test_dataset = None
+        self.shuffle = True
         if num_workers > 0:
             # default to spawn for now, as the default on linux "fork" hangs
             # when using dask (which the npyfilesmeps datastore uses)
@@ -660,6 +661,17 @@ class WeatherDataModule(pl.LightningDataModule):
                 num_future_forcing_steps=self.num_future_forcing_steps,
             )
 
+        if stage == "train" or stage is None:
+            self.train_dataset = WeatherDataset(
+                datastore=self._datastore,
+                split="train",
+                ar_steps=self.ar_steps_eval,
+                standardize=self.standardize,
+                num_past_forcing_steps=self.num_past_forcing_steps,
+                num_future_forcing_steps=self.num_future_forcing_steps,
+            )
+            self.shuffle = False
+
         if stage == "test" or stage is None:
             self.test_dataset = WeatherDataset(
                 datastore=self._datastore,
@@ -676,7 +688,7 @@ class WeatherDataModule(pl.LightningDataModule):
             self.train_dataset,
             batch_size=self.batch_size,
             num_workers=self.num_workers,
-            shuffle=True,
+            shuffle=self.shuffle,
             multiprocessing_context=self.multiprocessing_context,
             persistent_workers=True,
         )
