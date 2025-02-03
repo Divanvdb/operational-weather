@@ -1,4 +1,4 @@
-# Implementation of Neural LAM by Divan van der Bank
+# Implementation of Neural LAM by Divan van der Bank - Creating SA-GNN
 
 Find the original NeuralLAM repo at [NeuralLAM](https://github.com/mllam/neural-lam/tree/main)
 
@@ -10,3 +10,6 @@ Find the original NeuralLAM repo at [NeuralLAM](https://github.com/mllam/neural-
 
 ![alt text](images/progress.png)
 
+## With the goal to compare the SA-GNN model with current Global AIWP models and ground truth datasets
+
+![alt text](images/metric_graphs.png)

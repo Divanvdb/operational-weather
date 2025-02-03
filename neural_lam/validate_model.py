@@ -13,7 +13,7 @@ from .models import GraphLAM
 from .weather_dataset import WeatherDataModule
 
 @logger.catch
-def main(input_args=None):
+def main(input_args=None, total = 10):
     """Main function for training and evaluating models."""
     parser = ArgumentParser(description="Train or evaluate NeurWP models for LAM")
     
@@ -103,11 +103,11 @@ def main(input_args=None):
             # Assign coordinates
             output.coords['time'] = predictions['time'][0].values  # Copy the time coordinate from the input
             output.coords['prediction_timedelta'] = ('prediction_timedelta', np.arange(0, 7))  # Correct dim name
-            output.coords['lat'] = ('lat', predictions['y'].values)  # Explicitly assign dimension
-            output.coords['lon'] = ('lon', predictions['x'].values)  # Explicitly assign dimension
+            output.coords['latitude'] = ('latitude', predictions['y'].values)  # Explicitly assign dimension
+            output.coords['longitude'] = ('longitude', predictions['x'].values)  # Explicitly assign dimension
 
-            output['prediction'] = (('prediction_timedelta', 'lon', 'lat'), predictions.values)
-            output['target'] = (('prediction_timedelta', 'lon', 'lat'), targets.values)
+            output['wind_speed'] = (('prediction_timedelta', 'longitude', 'latitude'), predictions.values)
+            # output['target'] = (('prediction_timedelta', 'longitude', 'latitude'), targets.values)
 
             catch = False
 
@@ -118,11 +118,11 @@ def main(input_args=None):
             # Assign coordinates
             temp.coords['time'] = predictions['time'][0].values  # Copy the time coordinate from the input
             temp.coords['prediction_timedelta'] = ('prediction_timedelta', np.arange(0, 7))  # Correct dim name
-            temp.coords['lat'] = ('lat', predictions['y'].values)  # Explicitly assign dimension
-            temp.coords['lon'] = ('lon', predictions['x'].values)  # Explicitly assign dimension
+            temp.coords['latitude'] = ('latitude', predictions['y'].values)  # Explicitly assign dimension
+            temp.coords['longitude'] = ('longitude', predictions['x'].values)  # Explicitly assign dimension
             
-            temp['prediction'] = (('prediction_timedelta', 'lon', 'lat'), predictions.values)
-            temp['target'] = (('prediction_timedelta', 'lon', 'lat'), targets.values)
+            temp['wind_speed'] = (('prediction_timedelta', 'longitude', 'latitude'), predictions.values)
+            # temp['target'] = (('prediction_timedelta', 'longitude', 'latitude'), targets.values)
 
             # Concatenate the temp dataset to the output dataset
             output = xr.concat([output, temp], dim='time')
@@ -140,6 +140,7 @@ def main(input_args=None):
     return output
 
 if __name__ == "__main__":
-    output = main()
+    total = 10
+    output = main(total = total)
 
-    output.to_netcdf('output_20x7x49x69.nc')
+    output.to_netcdf(f'output_{total}x7x49x69.nc')

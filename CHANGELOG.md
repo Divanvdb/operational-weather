@@ -31,4 +31,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Ensure the **standardization** of the weather data is done correctly
 - Reduce `n_boundary_points=2` to `n_boundary_points=0` in `mdp.py` to ensure the model doesn't use future forcings 
 - Used trained model for the prediction of wind speed data
+- Use: `saved_models\train-graph_lam-4x64-01_23_13-3100\min_val_loss.ckpt`
 
