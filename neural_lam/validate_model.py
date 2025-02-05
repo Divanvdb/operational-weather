@@ -106,7 +106,7 @@ def main(input_args=None, total = 10):
             output.coords['latitude'] = ('latitude', predictions['y'].values)  # Explicitly assign dimension
             output.coords['longitude'] = ('longitude', predictions['x'].values)  # Explicitly assign dimension
 
-            output['wind_speed'] = (('prediction_timedelta', 'longitude', 'latitude'), predictions.values)
+            output['wind_speed'] = (('prediction_timedelta', 'latitude', 'longitude'), predictions.values)
             # output['target'] = (('prediction_timedelta', 'longitude', 'latitude'), targets.values)
 
             catch = False
@@ -121,14 +121,14 @@ def main(input_args=None, total = 10):
             temp.coords['latitude'] = ('latitude', predictions['y'].values)  # Explicitly assign dimension
             temp.coords['longitude'] = ('longitude', predictions['x'].values)  # Explicitly assign dimension
             
-            temp['wind_speed'] = (('prediction_timedelta', 'longitude', 'latitude'), predictions.values)
+            temp['wind_speed'] = (('prediction_timedelta', 'latitude', 'longitude'), predictions.values)
             # temp['target'] = (('prediction_timedelta', 'longitude', 'latitude'), targets.values)
 
             # Concatenate the temp dataset to the output dataset
             output = xr.concat([output, temp], dim='time')
 
         count += 1
-        if count == 20:
+        if count == total:
             break
 
 
@@ -140,7 +140,7 @@ def main(input_args=None, total = 10):
     return output
 
 if __name__ == "__main__":
-    total = 10
+    total = 1452
     output = main(total = total)
 
     output.to_netcdf(f'output_{total}x7x49x69.nc')

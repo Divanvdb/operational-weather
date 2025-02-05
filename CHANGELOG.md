@@ -26,10 +26,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added a train option into the `setup` function of `weather_dataset` to create a testing datastore with unshuffled dataloader
 - Redid `validate_model.py` to produce and `output_20x7x49x69` file for weather evaluation using untrained model
 
+## [v0.1.2](https://github.com/Divanvdb/dk-neural-lam)
+
+- Ensured the **standardization** of the weather data is done correctly
+- Reduced `n_boundary_points=2` to `n_boundary_points=0` in `mdp.py` to ensure the model doesn't use future forcings with `--num_future_forcing_steps 0` 
+- Used: `saved_models\train-graph_lam-4x64-01_23_13-3100\min_val_loss.ckpt`
+- Reordered the output file coordinates in `validate_model.py`
+- Added a `total` variable to the `validate_model.py` script
+
 ## TODO:
 
-- Ensure the **standardization** of the weather data is done correctly
-- Reduce `n_boundary_points=2` to `n_boundary_points=0` in `mdp.py` to ensure the model doesn't use future forcings 
-- Used trained model for the prediction of wind speed data
-- Use: `saved_models\train-graph_lam-4x64-01_23_13-3100\min_val_loss.ckpt`
+- Add the `plot_data.py` to the project
 
