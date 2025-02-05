@@ -626,20 +626,20 @@ class ARModel(pl.LightningModule):
         #TODO: Errors due to shape mismathes in the metrics_dict tensors
         log_dict = {}
         for metric_name, metric_val_list in metrics_dict.items():
-            print(f"{prefix} {metric_name} list length: {len(metric_val_list)}")
-            print(f"{prefix} {metric_name} tensor shape: {metric_val_list[0].shape}")
-            print(f"{prefix} {metric_name} tensor shape: {metric_val_list[1].shape}")
+            # print(f"{prefix} {metric_name} list length: {len(metric_val_list)}")
+            # print(f"{prefix} {metric_name} tensor shape: {metric_val_list[0].shape}")
+            # print(f"{prefix} {metric_name} tensor shape: {metric_val_list[1].shape}")
             metric_tensor = self.all_gather_cat(
                 torch.cat(metric_val_list, dim=0)
             )  # (N_eval, pred_steps, d_f)
-            print(f"{prefix} {metric_name} tensor shape: {metric_tensor.shape}")
+            # print(f"{prefix} {metric_name} tensor shape: {metric_tensor.shape}")
 
             if self.trainer.is_global_zero:
                 
                 metric_tensor_averaged = torch.mean(metric_tensor, dim=0)
                 # (pred_steps, d_f)
 
-                print(f"{prefix} {metric_name} tensor averaged shape: {metric_tensor_averaged.shape}")
+                # print(f"{prefix} {metric_name} tensor averaged shape: {metric_tensor_averaged.shape}")
 
                 # Take square root after all averaging to change MSE to RMSE
                 if "mse" in metric_name:
