@@ -26,7 +26,7 @@ def main(input_args=None, total = 10):
     parser.add_argument("--ar_steps_train", type=int, default=1, help="Number of steps to unroll prediction for during training (default: 10)")
     parser.add_argument("--ar_steps_eval", type=int, default=7, help="Number of steps to unroll prediction for during evaluation (default: 10)")
     parser.add_argument("--num_past_forcing_steps", type=int, default=1, help="Number of past forcing steps (default: 4)")
-    parser.add_argument("--num_future_forcing_steps", type=int, default=1, help="Number of future forcing steps (default: 4)")
+    parser.add_argument("--num_future_forcing_steps", type=int, default=0, help="Number of future forcing steps (default: 4)")
     parser.add_argument("--num_workers", type=int, default=1, help="Number of workers for data loading (default: 1)")
     parser.add_argument("--eval", type=str, choices=[None, "val", "test"], default="test", help="Evaluation mode (default: None)")
     parser.add_argument("--seed", type=int, default=42, help="Random seed (default: 42)")
@@ -106,7 +106,7 @@ def main(input_args=None, total = 10):
             output.coords['latitude'] = ('latitude', predictions['y'].values)  # Explicitly assign dimension
             output.coords['longitude'] = ('longitude', predictions['x'].values)  # Explicitly assign dimension
 
-            output['wind_speed'] = (('prediction_timedelta', 'latitude', 'longitude'), predictions.values)
+            output['wind_speed'] = (('prediction_timedelta', 'longitude', 'latitude'), predictions.values)
             # output['target'] = (('prediction_timedelta', 'longitude', 'latitude'), targets.values)
 
             catch = False
@@ -121,7 +121,7 @@ def main(input_args=None, total = 10):
             temp.coords['latitude'] = ('latitude', predictions['y'].values)  # Explicitly assign dimension
             temp.coords['longitude'] = ('longitude', predictions['x'].values)  # Explicitly assign dimension
             
-            temp['wind_speed'] = (('prediction_timedelta', 'latitude', 'longitude'), predictions.values)
+            temp['wind_speed'] = (('prediction_timedelta', 'longitude', 'latitude'), predictions.values)
             # temp['target'] = (('prediction_timedelta', 'longitude', 'latitude'), targets.values)
 
             # Concatenate the temp dataset to the output dataset
