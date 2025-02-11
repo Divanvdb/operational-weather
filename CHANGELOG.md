@@ -33,6 +33,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Used: `saved_models\train-graph_lam-4x64-01_23_13-3100\min_val_loss.ckpt`
 - Added a `total` variable to the `validate_model.py` script
 
+## [v0.1.3](https://github.com/Divanvdb/dk-neural-lam)
+
+- Updated the `train_model.py` to have the default values in the `args`
+
 ## TODO:
 
 - Add the `plot_data.py` to the project

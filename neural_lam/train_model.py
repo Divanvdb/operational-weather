@@ -31,6 +31,7 @@ def main(input_args=None):
     )
     parser.add_argument(
         "--config_path",
+        default='era5/config.yaml',
         type=str,
         help="Path to the configuration for neural-lam",
     )
@@ -46,17 +47,17 @@ def main(input_args=None):
     parser.add_argument(
         "--num_workers",
         type=int,
-        default=4,
+        default=8,
         help="Number of workers in data loader (default: 4)",
     )
     parser.add_argument(
         "--epochs",
         type=int,
-        default=200,
+        default=100,
         help="upper epoch limit (default: 200)",
     )
     parser.add_argument(
-        "--batch_size", type=int, default=4, help="batch size (default: 4)"
+        "--batch_size", type=int, default=8, help="batch size (default: 4)"
     )
     parser.add_argument(
         "--load",
@@ -152,14 +153,14 @@ def main(input_args=None):
     parser.add_argument(
         "--ar_steps_eval",
         type=int,
-        default=10,
+        default=7,
         help="Number of steps to unroll prediction for during evaluation "
         "(default: 10)",
     )
     parser.add_argument(
         "--n_example_pred",
         type=int,
-        default=1,
+        default=0,
         help="Number of example predictions to plot during evaluation "
         "(default: 1)",
     )
@@ -207,7 +208,7 @@ def main(input_args=None):
     parser.add_argument(
         "--num_future_forcing_steps",
         type=int,
-        default=1,
+        default=0,
         help="Number of future time steps to use as input for forcing data",
     )
     args = parser.parse_args(input_args)

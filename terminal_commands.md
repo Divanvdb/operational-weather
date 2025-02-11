@@ -2,13 +2,13 @@
 
 > Creating the datastore: python -m mllam_data_prep C:\Users\23603526\Documents\GitHub\neural-lam-Divan\era5_2020\test.datastore.yaml
 
-> Creating the graph: python -m neural_lam.create_graph --config_path C:\Users\23603526\Documents\GitHub\neural-lam-Divan\era5_2020\test_config.yaml --name multiscale
+> Creating the graph: python -m neural_lam.create_graph --config_path C:\Users\23603526\Documents\GitHub\neural-lam-Divan\era5_2020\test_config.yaml --name single --levels 1
 
 > Plot the graph: python -m neural_lam.plot_graph --datastore_config_path C:\Users\23603526\Documents\GitHub\neural-lam-Divan\era5\config.yaml --graph multiscale
 
 > Training a model: python -m neural_lam.train_model --config_path C:\Users\23603526\Documents\GitHub\neural-lam-Divan\era5\config.yaml --model graph_lam --epochs 2 --batch_size 8 --graph multiscale --ar_steps_train 1 --loss wmse --ar_steps_eval 7
 
-> Validating a model on 2020 data: python -m neural_lam.validate_model --config_path era5_2020\test_config.yaml --load C:\Users\23603526\Documents\GitHub\neural-lam-Divan\saved_models\train-graph_lam-4x64-01_23_13-3100\min_val_loss.ckpt 
+> Validating a model on 2020 data: python -m neural_lam.validate_model --config_path era5_2020\test_config.yaml --load C:\Users\23603526\Documents\GitHub\neural-lam-Divan\saved_models\train-graph_lam-4x64-02_07_10-3371\min_val_loss.ckpt
 
 # Terminal Commands for Lightning AI
 
