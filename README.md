@@ -1,5 +1,11 @@
 # Implementation of Neural LAM by Divan van der Bank - Creating SA-GNN
 
+## NeuralLAM Immediate Issues
+
+- Dataloaders:
+    - The standardization of the data taes up much of the time (reduced time by 50%)
+    
+
 Find the original NeuralLAM repo at [NeuralLAM](https://github.com/mllam/neural-lam/tree/main)
 
 ## For interest sake, here is an image of the graph architecture:
@@ -27,8 +33,4 @@ My research focuses on spatial AI weather forecasting because current NWP techni
 _Keywords_:
 ("machine learning" OR "artificial intelligence" OR "ML" OR "AI") AND ("renewable energy" OR "wind power" OR "forecasting" OR "spatial modeling" OR "weather prediction")
 
-### NeuralLAM Questions
 
-- Dataloaders:
-    - Very slow at the moment taking up to 70% of the training time?
-    
