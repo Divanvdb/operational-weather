@@ -17,3 +17,18 @@ Find the original NeuralLAM repo at [NeuralLAM](https://github.com/mllam/neural-
 ## And the first outputs of the model
 
 ![alt text](images/output_1.png)
+
+## Research Questions
+
+This research aims to develop a Spatial wind speed forecasting model which addresses the following research question:
+
+My research focuses on spatial AI weather forecasting because current NWP techniques have limited accuracy and availability for use as input to wind power forecasting models.
+
+_Keywords_:
+("machine learning" OR "artificial intelligence" OR "ML" OR "AI") AND ("renewable energy" OR "wind power" OR "forecasting" OR "spatial modeling" OR "weather prediction")
+
+### NeuralLAM Questions
+
+- Dataloaders:
+    - Very slow at the moment taking up to 70% of the training time?
+    
