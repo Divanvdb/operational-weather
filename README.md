@@ -19,7 +19,7 @@ Find the original NeuralLAM repo at [NeuralLAM](https://github.com/mllam/neural-
 ## With the goal to compare the SA-GNN model with current Global AIWP models and ground truth datasets
 
 ![alt text](images/metric_graphs.png)
-![alt text](image.png)
+
 ## And the first outputs of the model
 
 ![alt text](images/output_1.png)

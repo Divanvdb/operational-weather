@@ -50,6 +50,7 @@ def main():
     xy = datastore.get_xy("state", stacked=True)  # (N_grid, 2)
     pos_max = np.max(np.abs(xy))
     grid_pos = xy / pos_max  # Divide by maximum coordinate
+    grid_pos = grid_pos[np.lexsort((grid_pos[:, 0], grid_pos[:, 1]))]
 
     # Load graph data
     graph_dir_path = os.path.join(datastore.root_path, "graph", args.graph)

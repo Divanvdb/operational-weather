@@ -7,3 +7,4 @@ predictions.ipynb
 *.nc
 debug.py
 neural_lam/test_dataloader.py
+projections.ipynb

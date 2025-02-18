@@ -40,8 +40,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [v0.1.4](https://github.com/Divanvdb/dk-neural-lam)
 
 - Found that the **standardization** happening within the `_build_item_dataarrays()` function constrains the **CPU**
-- Move the **standardization** to **GPU** before computing
+
 - `.yaml` setting files also updated to only include `wind_speed850.0hPa` at this stage, but might revert
 - Brought back the `boundary_points = 5` to see what this would affect
 - Added a `plot_data.ipynb` notebook that visualizes the output from `validate_model.py`
+
+## [v0.1.5](https://github.com/Divanvdb/dk-neural-lam)
+
+- Fixed the transposed grid problem in `plot_graph.py`
+- Moved the **standardization** to **GPU** before computing in the `_build_item_dataarrays()` of `weather_dataset.py`
 

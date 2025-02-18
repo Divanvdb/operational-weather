@@ -351,28 +351,12 @@ class WeatherDataset(torch.utils.data.Dataset):
         da_target_times : xr.DataArray
             The dataarray for the target times.
         """
-        # handling ensemble data
-        if self.datastore.is_ensemble:
-            # for the now the strategy is to only include the first ensemble
-            # member
-            # XXX: this could be changed to include all ensemble members by
-            # splitting `idx` into two parts, one for the analysis time and one
-            # for the ensemble member and then increasing self.__len__ to
-            # include all ensemble members
-            warnings.warn(
-                "only use of ensemble member 0 (the first member) is "
-                "implemented for ensemble data"
-            )
-            i_ensemble = 0
-            da_state = self.da_state.isel(ensemble_member=i_ensemble)
-        else:
-            da_state = self.da_state
+
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        
+        da_state = self.da_state
 
         if self.da_forcing is not None:
-            if "ensemble_member" in self.da_forcing.dims:
-                raise NotImplementedError(
-                    "Ensemble member not yet supported for forcing data"
-                )
             da_forcing = self.da_forcing
         else:
             da_forcing = None
@@ -387,59 +371,55 @@ class WeatherDataset(torch.utils.data.Dataset):
                 da_forcing=da_forcing, idx=idx, n_steps=self.ar_steps
             )
 
-        # MOST TIME CONSUMING BELOW
-        da_state.load()
-        if da_forcing is not None:
-            da_forcing_windowed.load()
-
-        da_init_states = da_state.isel(time=slice(0, 2))
+        # Convert to NumPy before moving to GPU
         da_target_states = da_state.isel(time=slice(2, None))
         da_target_times = da_target_states.time
+        da_state_np = da_state.values
+        da_forcing_np = da_forcing_windowed.values if da_forcing is not None else None
 
+        # Move data to GPU
+        da_state_tensor = torch.tensor(da_state_np, dtype=torch.float32, device=device)
+        da_forcing_tensor = torch.tensor(da_forcing_np, dtype=torch.float32, device=device) if da_forcing_np is not None else None
+
+        # Slice states
+        da_init_states = da_state_tensor[:2]  # First two time steps
+        da_target_states = da_state_tensor[2:]  # Remaining time steps
+
+        # Convert target times to tensor on GPU
+        
+        target_times = torch.tensor(
+            da_target_times.astype("datetime64[ns]").astype("int64").values,
+            dtype=torch.int64, device=device
+        )
+
+        # Standardization directly on GPU
         if self.standardize:
-            da_init_states = (
-                da_init_states - self.da_state_mean
-            ) / self.da_state_std
-            da_target_states = (
-                da_target_states - self.da_state_mean
-            ) / self.da_state_std
+            da_state_mean_tensor = torch.tensor(self.da_state_mean.values, dtype=torch.float32, device=device)
+            da_state_std_tensor = torch.tensor(self.da_state_std.values, dtype=torch.float32, device=device)
 
-            if da_forcing is not None:
-                # XXX: Here we implicitly assume that the last dimension of the
-                # forcing data is the forcing feature dimension. To standardize
-                # on `.device` we need a different implementation. (e.g. a
-                # tensor with repeated means and stds for each "windowed" time.)
-                da_forcing_windowed = (
-                    da_forcing_windowed - self.da_forcing_mean
-                ) / self.da_forcing_std
 
-        #MOST TIME CONSUMING ABOVE
-        if da_forcing is not None:
-            # stack the `forcing_feature` and `window_sample` dimensions into a
-            # single `forcing_feature` dimension
-            da_forcing_windowed = da_forcing_windowed.stack(
-                forcing_feature_windowed=("forcing_feature", "window")
-            )
+            da_init_states = (da_init_states - da_state_mean_tensor) / da_state_std_tensor
+            
+            da_target_states = (da_target_states - da_state_mean_tensor) / da_state_std_tensor
+
+            if da_forcing_tensor is not None:
+                da_forcing_mean_tensor = torch.tensor(self.da_forcing_mean.values, dtype=torch.float32, device=device)
+                da_forcing_std_tensor = torch.tensor(self.da_forcing_std.values, dtype=torch.float32, device=device)
+                da_forcing_tensor = (
+                    da_forcing_tensor - da_forcing_mean_tensor) / da_forcing_std_tensor
+
+        # Reshape forcing if available
+        if da_forcing_tensor is not None:
+            da_forcing_tensor = da_forcing_tensor.view(self.ar_steps, da_forcing_tensor.shape[-2], -1)
         else:
-            # create an empty forcing tensor with the right shape
-            da_forcing_windowed = xr.DataArray(
-                data=np.empty(
-                    (self.ar_steps, da_state.grid_index.size, 0),
-                ),
-                dims=("time", "grid_index", "forcing_feature"),
-                coords={
-                    "time": da_target_times,
-                    "grid_index": da_state.grid_index,
-                    "forcing_feature": [],
-                },
-            )
+            da_forcing_tensor = torch.empty((self.ar_steps, da_state_tensor.shape[1], 0), device=device)
 
         return (
             da_init_states,
             da_target_states,
-            da_forcing_windowed,
-            da_target_times,
-        )
+            da_forcing_tensor, 
+            target_times,
+        ) 
 
     def __getitem__(self, idx):
         """
@@ -472,29 +452,10 @@ class WeatherDataset(torch.utils.data.Dataset):
             da_init_states,
             da_target_states,
             da_forcing_windowed,
-            da_target_times,
+            target_times,
         ) = self._build_item_dataarrays(idx=idx)
 
-        tensor_dtype = torch.float32
-
-        init_states = torch.tensor(da_init_states.values, dtype=tensor_dtype)
-        target_states = torch.tensor(
-            da_target_states.values, dtype=tensor_dtype
-        )
-
-        target_times = torch.tensor(
-            da_target_times.astype("datetime64[ns]").astype("int64").values,
-            dtype=torch.int64,
-        )
-
-        forcing = torch.tensor(da_forcing_windowed.values, dtype=tensor_dtype)
-
-        # init_states: (2, N_grid, d_features)
-        # target_states: (ar_steps, N_grid, d_features)
-        # forcing: (ar_steps, N_grid, d_windowed_forcing)
-        # target_times: (ar_steps,)
-
-        return init_states, target_states, forcing, target_times
+        return da_init_states, da_target_states, da_forcing_windowed, target_times
 
     def __iter__(self):
         """
