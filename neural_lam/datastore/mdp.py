@@ -27,7 +27,7 @@ class MDPDatastore(BaseRegularGridDatastore):
 
     SHORT_NAME = "mdp" 
 
-    def __init__(self, config_path, n_boundary_points=0, reuse_existing=True):
+    def __init__(self, config_path, n_boundary_points=5, reuse_existing=True):
         """
         Construct a new MDPDatastore from the configuration file at
         `config_path`. A boundary mask is created with `n_boundary_points`

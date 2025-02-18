@@ -387,7 +387,7 @@ class WeatherDataset(torch.utils.data.Dataset):
                 da_forcing=da_forcing, idx=idx, n_steps=self.ar_steps
             )
 
-        # load the data into memory
+        # MOST TIME CONSUMING BELOW
         da_state.load()
         if da_forcing is not None:
             da_forcing_windowed.load()
@@ -413,6 +413,7 @@ class WeatherDataset(torch.utils.data.Dataset):
                     da_forcing_windowed - self.da_forcing_mean
                 ) / self.da_forcing_std
 
+        #MOST TIME CONSUMING ABOVE
         if da_forcing is not None:
             # stack the `forcing_feature` and `window_sample` dimensions into a
             # single `forcing_feature` dimension

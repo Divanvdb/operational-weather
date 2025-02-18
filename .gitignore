@@ -6,3 +6,4 @@ model_settings.yaml
 predictions.ipynb
 *.nc
 debug.py
+neural_lam/test_dataloader.py

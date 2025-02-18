@@ -140,7 +140,7 @@ def main(input_args=None, total = 10):
     return output
 
 if __name__ == "__main__":
-    total = 1452
+    total = 15
     output = main(total = total)
 
     output.to_netcdf(f'output_{total}x7x49x69.nc')

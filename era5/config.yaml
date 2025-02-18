@@ -5,11 +5,11 @@ training:
   state_feature_weighting:
     __config_class__: ManualStateFeatureWeighting
     weights:
-      z850.0hPa: 1
-      r850.0hPa: 1
-      t850.0hPa: 1
-      u850.0hPa: 1
-      v850.0hPa: 1 
-      w850.0hPa: 1
+      # z850.0hPa: 1
+      # r850.0hPa: 1
+      # t850.0hPa: 1
+      # u850.0hPa: 1
+      # v850.0hPa: 1 
+      # w850.0hPa: 1
       wind_speed850.0hPa: 1
 

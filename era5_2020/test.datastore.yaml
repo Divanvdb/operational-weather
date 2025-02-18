@@ -34,12 +34,12 @@ inputs:
     path: C:\Users\23603526\Documents\GitHub\neural-lam-Divan\era5_2020\era5_2020_xy.nc
     dims: [time, x, y, pressure_level]
     variables:
-      - z
-      - r
-      - t
-      - u
-      - v
-      - w
+      # - z
+      # - r
+      # - t
+      # - u
+      # - v
+      # - w
       - wind_speed
 
     dim_mapping:
