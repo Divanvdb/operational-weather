@@ -107,7 +107,7 @@ def main(input_args=None, total = 10):
             output.coords['longitude'] = ('longitude', predictions['x'].values)  # Explicitly assign dimension
 
             output['wind_speed'] = (('prediction_timedelta', 'longitude', 'latitude'), predictions.values)
-            # output['target'] = (('prediction_timedelta', 'longitude', 'latitude'), targets.values)
+            output['target'] = (('prediction_timedelta', 'longitude', 'latitude'), targets.values)
 
             catch = False
 
@@ -122,7 +122,7 @@ def main(input_args=None, total = 10):
             temp.coords['longitude'] = ('longitude', predictions['x'].values)  # Explicitly assign dimension
             
             temp['wind_speed'] = (('prediction_timedelta', 'longitude', 'latitude'), predictions.values)
-            # temp['target'] = (('prediction_timedelta', 'longitude', 'latitude'), targets.values)
+            temp['target'] = (('prediction_timedelta', 'longitude', 'latitude'), targets.values)
 
             # Concatenate the temp dataset to the output dataset
             output = xr.concat([output, temp], dim='time')

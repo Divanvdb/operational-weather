@@ -31,15 +31,15 @@ output:
 
 inputs:
   era_variables:
-    path: C:\Users\23603526\Documents\GitHub\neural-lam-Divan\era5\era5_2010_2019_xy.nc
+    path: /teamspace/studios/this_studio/dk-neural-lam/era5/era5_2010_2019_xy.nc
     dims: [time, x, y, pressure_level]
     variables:
-      # - z
-      # - r
-      # - t
-      # - u
-      # - v
-      # - w
+      - z
+      - r
+      - t
+      - u
+      - v
+      - w
       - wind_speed
 
     dim_mapping:
@@ -56,7 +56,7 @@ inputs:
     target_output_variable: state
 
   era_times:
-    path: C:\Users\23603526\Documents\GitHub\neural-lam-Divan\era5\era5_2010_2019_xy.nc
+    path: /teamspace/studios/this_studio/dk-neural-lam/era5/era5_2010_2019_xy.nc
     dims: [time, x, y, pressure_level]
     variables:
 
@@ -76,7 +76,7 @@ inputs:
     target_output_variable: forcing
 
   era_lsm:
-    path: C:\Users\23603526\Documents\GitHub\neural-lam-Divan\era5\era5_2010_2019_xy.nc
+    path: /teamspace/studios/this_studio/dk-neural-lam/era5/era5_2010_2019_xy.nc
     dims: [time, x, y, pressure_level]
 
     variables:

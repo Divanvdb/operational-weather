@@ -8,3 +8,5 @@ predictions.ipynb
 debug.py
 neural_lam/test_dataloader.py
 projections.ipynb
+*.pt
+neural_lam/plot_progress.py

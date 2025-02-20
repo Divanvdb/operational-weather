@@ -18,7 +18,8 @@
 
 > Plot the graph: python -m neural_lam.plot_graph --datastore_config_path /teamspace/studios/this_studio/dk-neural-lam/era5/config.yaml --graph hierarchical
 
-> Training a model: python -m neural_lam.train_model --config_path /teamspace/studios/this_studio/dk-neural-lam/era5/config.yaml --model hi_lam --epochs 50 --batch_size 8 --graph hierarchical --ar_steps_train 1 --loss wmse --ar_steps_eval 7 --num_workers 16 --num_future_forcing_steps 0
+> Training a model: python -m neural_lam.train_model --config_path /teamspace/studios/this_studio/dk-neural-lam/era5/config.yaml --model graph_lam --epochs 2 --batch_size 8 --graph multiscale --ar_steps_train 1 --loss wmse --ar_steps_eval 7 --num_workers 16 --num_future_forcing_steps 0
 
-> Validating a model on 2020 data: python -m neural_lam.validate_model --config_path /teamspace/studios/this_studio/dk-neural-lam/era5_2020/test_config.yaml --load /teamspace/studios/this_studio/dk-neural-lam/saved_models/train-graph_lam-4x64-02_17_13-0851/min_val_loss.ckpt
+> Validating a model on 2020 data: python -m neural_lam.validate_model --config_path /teamspace/studios/this_studio/dk-neural-lam/era5/config.yaml --load /teamspace/studios/this_studio/dk-neural-lam/saved_models/train-graph_lam-4x64-02_20_08-4058/min_val_loss.ckpt
 
+> Validating a model using **pl.Trainer**: python -m neural_lam.train_model --config_path /teamspace/studios/this_studio/dk-neural-lam/era5/config.yaml --model graph_lam --epochs 2 --batch_size 8 --graph multiscale --ar_steps_train 1 --loss wmse --ar_steps_eval 7 --num_workers 16 --num_future_forcing_steps 0 --eval test

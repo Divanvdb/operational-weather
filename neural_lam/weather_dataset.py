@@ -576,11 +576,11 @@ class WeatherDataModule(pl.LightningDataModule):
     def __init__(
         self,
         datastore: BaseDatastore,
-        ar_steps_train=3,
-        ar_steps_eval=25,
+        ar_steps_train=1,
+        ar_steps_eval=7,
         standardize=True,
-        num_past_forcing_steps=1,
-        num_future_forcing_steps=1,
+        num_past_forcing_steps=2,
+        num_future_forcing_steps=0,
         batch_size=4,
         num_workers=16,
     ):

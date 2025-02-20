@@ -50,3 +50,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed the transposed grid problem in `plot_graph.py`
 - Moved the **standardization** to **GPU** before computing in the `_build_item_dataarrays()` of `weather_dataset.py`
 
+## [v0.1.6](https://github.com/Divanvdb/dk-neural-lam)
+
+- Added new `test_step` function to the `ar_model.py` script to generate testing data for visualization
+- Set the defaults in the `train_model.py` script
+- Brought back all the variables for training

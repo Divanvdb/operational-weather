@@ -102,6 +102,16 @@ class ARModel(pl.LightningModule):
                 persistent=False,
             )
 
+        # Standardization data for state
+        self.ds_state_stats = self._datastore.get_standardization_dataarray(
+                category="state"
+            )
+
+        self.da_state_mean = self.ds_state_stats.state_mean
+        self.da_state_std = self.ds_state_stats.state_std
+
+        self.count = 0
+        self.catch = True
         # grid_dim from data + static
         (
             self.num_grid_nodes,
@@ -379,87 +389,148 @@ class ARModel(pl.LightningModule):
         for metric_list in self.val_metrics.values():
             metric_list.clear()
 
-    # pylint: disable-next=unused-argument
+
     def test_step(self, batch, batch_idx):
-        """
-        Run test on single batch
-        """
-        # TODO Here batch_times can be used for plotting routines
-        prediction, target, pred_std, batch_times = self.common_step(batch)
-        # prediction: (B, pred_steps, num_grid_nodes, d_f) pred_std: (B,
-        # pred_steps, num_grid_nodes, d_f) or (d_f,)
-
-        time_step_loss = torch.mean(
-            self.loss(
-                prediction, target, pred_std, mask=self.interior_mask_bool
-            ),
-            dim=0,
-        )  # (time_steps-1,)
-        mean_loss = torch.mean(time_step_loss)
-
-        # Log loss per time step forward and mean
-        test_log_dict = {
-            f"test_loss_unroll{step}": time_step_loss[step - 1]
-            for step in self.args.val_steps_to_log
-        }
-        test_log_dict["test_mean_loss"] = mean_loss
-
-        self.log_dict(
-            test_log_dict,
-            on_step=False,
-            on_epoch=True,
-            sync_dist=True,
-            batch_size=batch[0].shape[0],
+        prediction, target, _, batch_times = self.common_step(batch)
+        
+        predictions = self._create_dataarray_from_tensor(
+            tensor=prediction[0], time=batch_times[0], split='train', category='state', use_numpy=False
+        )
+        targets = self._create_dataarray_from_tensor(
+            tensor=target[0], time=batch_times[0], split='train', category='state', use_numpy=False
         )
 
-        # Compute all evaluation metrics for error maps Note: explicitly list
-        # metrics here, as test_metrics can contain additional ones, computed
-        # differently, but that should be aggregated on_test_epoch_end
-        for metric_name in ("mse", "mae"):
-            metric_func = metrics.get_metric(metric_name)
-            batch_metric_vals = metric_func(
-                prediction,
-                target,
-                pred_std,
-                mask=self.interior_mask_bool,
-                sum_vars=False,
-            )  # (B, pred_steps, d_f)
-            self.test_metrics[metric_name].append(batch_metric_vals)
+        predictions = predictions.sel(state_feature='wind_speed850.0hPa').drop_vars('state_feature')
+        targets = targets.sel(state_feature='wind_speed850.0hPa').drop_vars('state_feature')
 
-        if self.output_std:
-            # Store output std. per variable, spatially averaged
-            mean_pred_std = torch.mean(
-                pred_std[..., self.interior_mask_bool, :], dim=-2
-            )  # (B, pred_steps, d_f)
-            self.test_metrics["output_std"].append(mean_pred_std)
+        # Unstack grid coordinates
+        predictions = self._datastore.unstack_grid_coords(predictions)
+        targets = self._datastore.unstack_grid_coords(targets)
 
-        # Save per-sample spatial loss for specific times
-        spatial_loss = self.loss(
-            prediction, target, pred_std, average_grid=False
-        )  # (B, pred_steps, num_grid_nodes)
-        log_spatial_losses = spatial_loss[
-            :, [step - 1 for step in self.args.val_steps_to_log]
-        ]
-        self.spatial_loss_maps.append(log_spatial_losses)
-        # (B, N_log, num_grid_nodes)
+        # Unstandardise the predictions and targets
+        wspd_meand = self.da_state_mean.sel(state_feature='wind_speed850.0hPa').values
+        wspd_stdd = self.da_state_std.sel(state_feature='wind_speed850.0hPa').values
+        predictions = predictions * wspd_stdd + wspd_meand
+        targets = targets * wspd_stdd + wspd_meand
+        self.count += 1
 
-        # Plot example predictions (on rank 0 only)
-        if (
-            self.trainer.is_global_zero
-            and self.plotted_examples < self.n_example_pred
-        ):
-            # Need to plot more example predictions
-            n_additional_examples = min(
-                prediction.shape[0],
-                self.n_example_pred - self.plotted_examples,
-            )
+        if self.catch:
+            # Initialize an empty Dataset
+            self.output = xr.Dataset()
 
-            self.plot_examples(
-                batch,
-                n_additional_examples,
-                prediction=prediction,
-                split="test",
-            )
+            # Assign coordinates
+            self.output.coords['time'] = predictions['time'][0].values  # Copy the time coordinate from the input
+            self.output.coords['prediction_timedelta'] = ('prediction_timedelta', np.arange(0, 7))  # Correct dim name
+            self.output.coords['latitude'] = ('latitude', predictions['y'].values)  # Explicitly assign dimension
+            self.output.coords['longitude'] = ('longitude', predictions['x'].values)  # Explicitly assign dimension
+
+            self.output['wind_speed'] = (('prediction_timedelta', 'longitude', 'latitude'), predictions.values)
+            self.output['target'] = (('prediction_timedelta', 'longitude', 'latitude'), targets.values)
+
+            self.catch = False
+
+        else:
+            # Init temp dataset
+            temp = xr.Dataset()
+
+            # Assign coordinates
+            temp.coords['time'] = predictions['time'][0].values  # Copy the time coordinate from the input
+            temp.coords['prediction_timedelta'] = ('prediction_timedelta', np.arange(0, 7))  # Correct dim name
+            temp.coords['latitude'] = ('latitude', predictions['y'].values)  # Explicitly assign dimension
+            temp.coords['longitude'] = ('longitude', predictions['x'].values)  # Explicitly assign dimension
+            
+            temp['wind_speed'] = (('prediction_timedelta', 'longitude', 'latitude'), predictions.values)
+            temp['target'] = (('prediction_timedelta', 'longitude', 'latitude'), targets.values)
+
+            # Concatenate the temp dataset to the output dataset
+            self.output = xr.concat([self.output, temp], dim='time')
+
+        if self.count == 5:
+            print("Outputting")
+            self.output.to_netcdf(f'output_{self.count}x7x49x69.nc')
+            print("Output complete")
+
+    # pylint: disable-next=unused-argument
+    # def test_step(self, batch, batch_idx):
+    #     """
+    #     Run test on single batch
+    #     """
+    #     # TODO Here batch_times can be used for plotting routines
+    #     prediction, target, pred_std, batch_times = self.common_step(batch)
+    #     # prediction: (B, pred_steps, num_grid_nodes, d_f) pred_std: (B,
+    #     # pred_steps, num_grid_nodes, d_f) or (d_f,)
+
+    #     time_step_loss = torch.mean(
+    #         self.loss(
+    #             prediction, target, pred_std, mask=self.interior_mask_bool
+    #         ),
+    #         dim=0,
+    #     )  # (time_steps-1,)
+    #     mean_loss = torch.mean(time_step_loss)
+
+    #     # Log loss per time step forward and mean
+    #     test_log_dict = {
+    #         f"test_loss_unroll{step}": time_step_loss[step - 1]
+    #         for step in self.args.val_steps_to_log
+    #     }
+    #     test_log_dict["test_mean_loss"] = mean_loss
+
+    #     self.log_dict(
+    #         test_log_dict,
+    #         on_step=False,
+    #         on_epoch=True,
+    #         sync_dist=True,
+    #         batch_size=batch[0].shape[0],
+    #     )
+
+    #     # Compute all evaluation metrics for error maps Note: explicitly list
+    #     # metrics here, as test_metrics can contain additional ones, computed
+    #     # differently, but that should be aggregated on_test_epoch_end
+    #     for metric_name in ("mse", "mae"):
+    #         metric_func = metrics.get_metric(metric_name)
+    #         batch_metric_vals = metric_func(
+    #             prediction,
+    #             target,
+    #             pred_std,
+    #             mask=self.interior_mask_bool,
+    #             sum_vars=False,
+    #         )  # (B, pred_steps, d_f)
+    #         self.test_metrics[metric_name].append(batch_metric_vals)
+
+    #     if self.output_std:
+    #         # Store output std. per variable, spatially averaged
+    #         mean_pred_std = torch.mean(
+    #             pred_std[..., self.interior_mask_bool, :], dim=-2
+    #         )  # (B, pred_steps, d_f)
+    #         self.test_metrics["output_std"].append(mean_pred_std)
+
+    #     # Save per-sample spatial loss for specific times
+    #     spatial_loss = self.loss(
+    #         prediction, target, pred_std, average_grid=False
+    #     )  # (B, pred_steps, num_grid_nodes)
+    #     log_spatial_losses = spatial_loss[
+    #         :, [step - 1 for step in self.args.val_steps_to_log]
+    #     ]
+    #     self.spatial_loss_maps.append(log_spatial_losses)
+    #     # (B, N_log, num_grid_nodes)
+
+    #     # Plot example predictions (on rank 0 only)
+    #     if (
+    #         self.trainer.is_global_zero
+    #         and self.plotted_examples < self.n_example_pred
+    #     ):
+    #         # Need to plot more example predictions
+    #         n_additional_examples = min(
+    #             prediction.shape[0],
+    #             self.n_example_pred - self.plotted_examples,
+    #         )
+
+    #         self.plot_examples(
+    #             batch,
+    #             n_additional_examples,
+    #             prediction=prediction,
+    #             split="test",
+    #         )
 
     def plot_examples(self, batch, n_examples, split, prediction=None):
         """
@@ -660,56 +731,59 @@ class ARModel(pl.LightningModule):
             plt.close("all")  # Close all figs
 
     def on_test_epoch_end(self):
-        """
-        Compute test metrics and make plots at the end of test epoch. Will
-        gather stored tensors and perform plotting and logging on rank 0.
-        """
-        # Create error maps for all test metrics
-        self.aggregate_and_plot_metrics(self.test_metrics, prefix="test")
+        self.output.to_netcdf(f'output_lenx7x49x69.nc')
 
-        # Plot spatial loss maps
-        spatial_loss_tensor = self.all_gather_cat(
-            torch.cat(self.spatial_loss_maps, dim=0)
-        )  # (N_test, N_log, num_grid_nodes)
-        if self.trainer.is_global_zero:
-            mean_spatial_loss = torch.mean(
-                spatial_loss_tensor, dim=0
-            )  # (N_log, num_grid_nodes)
+    # def on_test_epoch_end(self):
+    #     """
+    #     Compute test metrics and make plots at the end of test epoch. Will
+    #     gather stored tensors and perform plotting and logging on rank 0.
+    #     """
+    #     # Create error maps for all test metrics
+    #     self.aggregate_and_plot_metrics(self.test_metrics, prefix="test")
 
-            loss_map_figs = [
-                vis.plot_spatial_error(
-                    error=loss_map,
-                    datastore=self._datastore,
-                    title=f"Test loss, t={t_i} "
-                    f"({self._datastore.step_length * t_i} h)",
-                )
-                for t_i, loss_map in zip(
-                    self.args.val_steps_to_log, mean_spatial_loss
-                )
-            ]
+    #     # Plot spatial loss maps
+    #     spatial_loss_tensor = self.all_gather_cat(
+    #         torch.cat(self.spatial_loss_maps, dim=0)
+    #     )  # (N_test, N_log, num_grid_nodes)
+    #     if self.trainer.is_global_zero:
+    #         mean_spatial_loss = torch.mean(
+    #             spatial_loss_tensor, dim=0
+    #         )  # (N_log, num_grid_nodes)
 
-            # log all to same wandb key, sequentially
-            for fig in loss_map_figs:
-                wandb.log({"test_loss": wandb.Image(fig)})
+    #         loss_map_figs = [
+    #             vis.plot_spatial_error(
+    #                 error=loss_map,
+    #                 datastore=self._datastore,
+    #                 title=f"Test loss, t={t_i} "
+    #                 f"({self._datastore.step_length * t_i} h)",
+    #             )
+    #             for t_i, loss_map in zip(
+    #                 self.args.val_steps_to_log, mean_spatial_loss
+    #             )
+    #         ]
 
-            # also make without title and save as pdf
-            pdf_loss_map_figs = [
-                vis.plot_spatial_error(
-                    error=loss_map, datastore=self._datastore
-                )
-                for loss_map in mean_spatial_loss
-            ]
-            pdf_loss_maps_dir = os.path.join(wandb.run.dir, "spatial_loss_maps")
-            os.makedirs(pdf_loss_maps_dir, exist_ok=True)
-            for t_i, fig in zip(self.args.val_steps_to_log, pdf_loss_map_figs):
-                fig.savefig(os.path.join(pdf_loss_maps_dir, f"loss_t{t_i}.pdf"))
-            # save mean spatial loss as .pt file also
-            torch.save(
-                mean_spatial_loss.cpu(),
-                os.path.join(wandb.run.dir, "mean_spatial_loss.pt"),
-            )
+    #         # log all to same wandb key, sequentially
+    #         for fig in loss_map_figs:
+    #             wandb.log({"test_loss": wandb.Image(fig)})
 
-        self.spatial_loss_maps.clear()
+    #         # also make without title and save as pdf
+    #         pdf_loss_map_figs = [
+    #             vis.plot_spatial_error(
+    #                 error=loss_map, datastore=self._datastore
+    #             )
+    #             for loss_map in mean_spatial_loss
+    #         ]
+    #         pdf_loss_maps_dir = os.path.join(wandb.run.dir, "spatial_loss_maps")
+    #         os.makedirs(pdf_loss_maps_dir, exist_ok=True)
+    #         for t_i, fig in zip(self.args.val_steps_to_log, pdf_loss_map_figs):
+    #             fig.savefig(os.path.join(pdf_loss_maps_dir, f"loss_t{t_i}.pdf"))
+    #         # save mean spatial loss as .pt file also
+    #         torch.save(
+    #             mean_spatial_loss.cpu(),
+    #             os.path.join(wandb.run.dir, "mean_spatial_loss.pt"),
+    #         )
+
+    #     self.spatial_loss_maps.clear()
 
     def on_load_checkpoint(self, checkpoint):
         """

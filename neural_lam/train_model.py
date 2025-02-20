@@ -31,7 +31,7 @@ def main(input_args=None):
     )
     parser.add_argument(
         "--config_path",
-        default='era5/config.yaml',
+        default='/teamspace/studios/this_studio/dk-neural-lam/era5/config.yaml',
         type=str,
         help="Path to the configuration for neural-lam",
     )
@@ -47,13 +47,13 @@ def main(input_args=None):
     parser.add_argument(
         "--num_workers",
         type=int,
-        default=8,
+        default=4,
         help="Number of workers in data loader (default: 4)",
     )
     parser.add_argument(
         "--epochs",
         type=int,
-        default=100,
+        default=50,
         help="upper epoch limit (default: 200)",
     )
     parser.add_argument(
@@ -202,7 +202,7 @@ def main(input_args=None):
     parser.add_argument(
         "--num_past_forcing_steps",
         type=int,
-        default=1,
+        default=2,
         help="Number of past time steps to use as input for forcing data",
     )
     parser.add_argument(
@@ -257,6 +257,7 @@ def main(input_args=None):
     else:
         device_name = "cpu"
 
+    print(f"Using device: {device_name}")
     # Load model parameters Use new args for model
     ModelClass = MODELS[args.model]
     model = ModelClass(args, config=config, datastore=datastore)

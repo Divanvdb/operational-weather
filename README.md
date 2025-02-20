@@ -2,8 +2,8 @@
 
 ## NeuralLAM Immediate Issues
 
-- Dataloaders:
-    - The standardization of the data taes up much of the time (reduced time by 50%)
+Dataloaders:
+- The standardization of the data taes up much of the time (reduced time by 50%)
     
 
 Find the original NeuralLAM repo at [NeuralLAM](https://github.com/mllam/neural-lam/tree/main)
