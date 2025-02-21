@@ -1,12 +1,9 @@
 # Implementation of Neural LAM by Divan van der Bank - Creating SA-GNN
 
-## NeuralLAM Immediate Issues
+This model is based on work done by Oskarsson, Joel and Landelius, Tomas and Lindsten, Fredrik and details the modification and validation of their neural-lam model on ERA5 data for the region of South Africa. The results of this model will be compared to current leading AI weather prediction models and numeric weather prediction models using a modified version of WeatherBench by Rasp, Stephan.
 
-Dataloaders:
-- The standardization of the data taes up much of the time (reduced time by 50%)
-    
-
-Find the original NeuralLAM repo at [NeuralLAM](https://github.com/mllam/neural-lam/tree/main)
+Find the original NeuralLAM repository at [NeuralLAM](https://github.com/mllam/neural-lam/tree/main)
+Find the original WeahterBench repository at [WeatherBench](https://github.com/google-research/weatherbench2)
 
 ## For interest sake, here is an image of the graph architecture:
 
@@ -23,14 +20,5 @@ Find the original NeuralLAM repo at [NeuralLAM](https://github.com/mllam/neural-
 ## And the first outputs of the model
 
 ![alt text](images/output_1.png)
-
-## Research Questions
-
-This research aims to develop a Spatial wind speed forecasting model which addresses the following research question:
-
-My research focuses on spatial AI weather forecasting because current NWP techniques have limited accuracy and availability for use as input to wind power forecasting models.
-
-_Keywords_:
-("machine learning" OR "artificial intelligence" OR "ML" OR "AI") AND ("renewable energy" OR "wind power" OR "forecasting" OR "spatial modeling" OR "weather prediction")
 
 
