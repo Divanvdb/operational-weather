@@ -1,9 +1,10 @@
 # Implementation of Neural LAM by Divan van der Bank - Creating SA-GNN
 
-This model is based on work done by Oskarsson, Joel and Landelius, Tomas and Lindsten, Fredrik and details the modification and validation of their neural-lam model on ERA5 data for the region of South Africa. The results of this model will be compared to current leading AI weather prediction models and numeric weather prediction models using a modified version of WeatherBench by Rasp, Stephan.
+This model called **SA-GNN** is based on work done by *Oskarsson, Joel and Landelius, Tomas and Lindsten, Fredrik* and details the modification and validation of their **neural-lam model** on `ERA5 data` for the `region of South Africa`. The results of this model will be compared to **current leading AI weather prediction models** and numeric weather prediction models using a modified version of **WeatherBench** by *Rasp, Stephan*.
 
-Find the original NeuralLAM repository at [NeuralLAM](https://github.com/mllam/neural-lam/tree/main)
-Find the original WeahterBench repository at [WeatherBench](https://github.com/google-research/weatherbench2)
+Find the original **NeuralLAM** repository at [NeuralLAM](https://github.com/mllam/neural-lam/tree/main)
+
+Find the original **WeahterBench** repository at [WeatherBench](https://github.com/google-research/weatherbench2)
 
 ## For interest sake, here is an image of the graph architecture:
 
