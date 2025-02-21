@@ -13,6 +13,7 @@ Find the original **WeahterBench** repository at [WeatherBench](https://github.c
 ## And the progress to recreating and adapting the NeuralLAM model:
 
 ![alt text](images/progress.png)
+![alt text](image.png)
 
 ## With the goal to compare the SA-GNN model with current Global AIWP models and ground truth datasets
 
