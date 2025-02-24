@@ -47,7 +47,7 @@ def main(input_args=None):
     parser.add_argument(
         "--num_workers",
         type=int,
-        default=4,
+        default=16,
         help="Number of workers in data loader (default: 4)",
     )
     parser.add_argument(
@@ -81,7 +81,7 @@ def main(input_args=None):
     parser.add_argument(
         "--graph",
         type=str,
-        default="multiscale",
+        default="1level",
         help="Graph to load and use in graph-based model "
         "(default: multiscale)",
     )
@@ -153,7 +153,7 @@ def main(input_args=None):
     parser.add_argument(
         "--ar_steps_eval",
         type=int,
-        default=7,
+        default=6,
         help="Number of steps to unroll prediction for during evaluation "
         "(default: 10)",
     )
@@ -208,7 +208,7 @@ def main(input_args=None):
     parser.add_argument(
         "--num_future_forcing_steps",
         type=int,
-        default=0,
+        default=1,
         help="Number of future time steps to use as input for forcing data",
     )
     args = parser.parse_args(input_args)

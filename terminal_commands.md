@@ -14,12 +14,16 @@
 
 > Creating the datastore: python -m mllam_data_prep /teamspace/studios/this_studio/dk-neural-lam/era5_2020/test.datastore.yaml
 
-> Creating the graph: python -m neural_lam.create_graph --config_path /teamspace/studios/this_studio/dk-neural-lam/era5_2020/test_config.yaml --name multiscale
+> Creating the graph: python -m neural_lam.create_graph --config_path /teamspace/studios/this_studio/dk-neural-lam/era5/config.yaml --name 1level --levels 1
 
 > Plot the graph: python -m neural_lam.plot_graph --datastore_config_path /teamspace/studios/this_studio/dk-neural-lam/era5/config.yaml --graph hierarchical
 
 > Training a model: python -m neural_lam.train_model --config_path /teamspace/studios/this_studio/dk-neural-lam/era5/config.yaml --model graph_lam --epochs 2 --batch_size 8 --graph multiscale --ar_steps_train 1 --loss wmse --ar_steps_eval 7 --num_workers 16 --num_future_forcing_steps 0
 
-> Validating a model on 2020 data: python -m neural_lam.validate_model --config_path /teamspace/studios/this_studio/dk-neural-lam/era5/config.yaml --load /teamspace/studios/this_studio/dk-neural-lam/saved_models/train-graph_lam-4x64-02_20_08-4058/min_val_loss.ckpt
+python -m neural_lam.train_model --load /teamspace/studios/this_studio/dk-neural-lam/saved_models/train-graph_lam-4x64-02_20_13-6017/min_val_loss.ckpt --ar_steps_train 3
 
-> Validating a model using **pl.Trainer**: python -m neural_lam.train_model --config_path /teamspace/studios/this_studio/dk-neural-lam/era5/config.yaml --model graph_lam --epochs 2 --batch_size 8 --graph multiscale --ar_steps_train 1 --loss wmse --ar_steps_eval 7 --num_workers 16 --num_future_forcing_steps 0 --eval test
+> Validating a model on 2020 data: python -m neural_lam.validate_model --config_path /teamspace/studios/this_studio/dk-neural-lam/era5/config.yaml --load /teamspace/studios/this_studio/dk-neural-lam/saved_models/train-graph_lam-4x64-02_20_13-6017/min_val_loss.ckpt --ar_steps_train 3
+
+> Validating a model using **pl.Trainer**: 
+
+python -m neural_lam.train_model --num_workers 4 --load /teamspace/studios/this_studio/dk-neural-lam/saved_models/train-graph_lam-4x64-02_21_13-4587/min_val_loss.ckpt --eval test --batch_size 1 

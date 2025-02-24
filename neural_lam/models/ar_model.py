@@ -129,7 +129,7 @@ class ARModel(pl.LightningModule):
         self.loss = metrics.get_metric(args.loss)
 
         boundary_mask = torch.tensor(
-            da_boundary_mask.values, dtype=torch.float32
+            da_boundary_mask.values, dtype=torch.float32, device=self.device
         ).unsqueeze(
             1
         )  # add feature dim
@@ -420,7 +420,7 @@ class ARModel(pl.LightningModule):
 
             # Assign coordinates
             self.output.coords['time'] = predictions['time'][0].values  # Copy the time coordinate from the input
-            self.output.coords['prediction_timedelta'] = ('prediction_timedelta', np.arange(0, 7))  # Correct dim name
+            self.output.coords['prediction_timedelta'] = ('prediction_timedelta', np.arange(0, 6))  # Correct dim name
             self.output.coords['latitude'] = ('latitude', predictions['y'].values)  # Explicitly assign dimension
             self.output.coords['longitude'] = ('longitude', predictions['x'].values)  # Explicitly assign dimension
 
@@ -435,7 +435,7 @@ class ARModel(pl.LightningModule):
 
             # Assign coordinates
             temp.coords['time'] = predictions['time'][0].values  # Copy the time coordinate from the input
-            temp.coords['prediction_timedelta'] = ('prediction_timedelta', np.arange(0, 7))  # Correct dim name
+            temp.coords['prediction_timedelta'] = ('prediction_timedelta', np.arange(0, 6))  # Correct dim name
             temp.coords['latitude'] = ('latitude', predictions['y'].values)  # Explicitly assign dimension
             temp.coords['longitude'] = ('longitude', predictions['x'].values)  # Explicitly assign dimension
             
@@ -445,7 +445,7 @@ class ARModel(pl.LightningModule):
             # Concatenate the temp dataset to the output dataset
             self.output = xr.concat([self.output, temp], dim='time')
 
-        if self.count == 5:
+        if self.count == 6:
             print("Outputting")
             self.output.to_netcdf(f'output_{self.count}x7x49x69.nc')
             print("Output complete")
