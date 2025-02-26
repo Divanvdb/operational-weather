@@ -31,7 +31,7 @@ def main(input_args=None):
     )
     parser.add_argument(
         "--config_path",
-        default='/teamspace/studios/this_studio/dk-neural-lam/era5/config.yaml',
+        default='/teamspace/studios/this_studio/dk-neural-lam/era5_3h/config3h.yaml',
         type=str,
         help="Path to the configuration for neural-lam",
     )
@@ -81,7 +81,7 @@ def main(input_args=None):
     parser.add_argument(
         "--graph",
         type=str,
-        default="1level",
+        default="multiscale",
         help="Graph to load and use in graph-based model "
         "(default: multiscale)",
     )
@@ -129,7 +129,7 @@ def main(input_args=None):
     parser.add_argument(
         "--loss",
         type=str,
-        default="wmse",
+        default="mse",
         help="Loss function to use, see metric.py (default: wmse)",
     )
     parser.add_argument(
@@ -176,7 +176,7 @@ def main(input_args=None):
     parser.add_argument(
         "--wandb_project",
         type=str,
-        default="neural_lam",
+        default="neural_lam_3h",
         help="Wandb project name (default: neural_lam)",
     )
     parser.add_argument(
