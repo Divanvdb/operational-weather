@@ -55,3 +55,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added new `test_step` function to the `ar_model.py` script to generate testing data for visualization
 - Set the defaults in the `train_model.py` script
 - Brought back all the variables for training
+
+## [v0.1.7](https://github.com/Divanvdb/dk-neural-lam)
+
+- Added **3h** timestep dataset
