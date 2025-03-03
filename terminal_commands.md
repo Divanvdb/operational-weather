@@ -26,4 +26,4 @@ python -m neural_lam.train_model --load /teamspace/studios/this_studio/dk-neural
 
 > Validating a model using **pl.Trainer**: 
 
-python -m neural_lam.train_model --num_workers 4 --load /teamspace/studios/this_studio/dk-neural-lam/saved_models/train-graph_lam-4x64-02_28_11-5169/min_val_loss.ckpt --eval test --batch_size 1 --ar_steps_eval 12
+python -m neural_lam.train_model --num_workers 4 --load /teamspace/studios/this_studio/dk-neural-lam/saved_models/train-graph_lam-4x64-03_03_09-9005/min_val_loss.ckpt --eval test --batch_size 1 --ar_steps_eval 12

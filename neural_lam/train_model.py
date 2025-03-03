@@ -57,7 +57,7 @@ def main(input_args=None):
         help="upper epoch limit (default: 200)",
     )
     parser.add_argument(
-        "--batch_size", type=int, default=8, help="batch size (default: 4)"
+        "--batch_size", type=int, default=16, help="batch size (default: 4)"
     )
     parser.add_argument(
         "--load",
@@ -88,7 +88,7 @@ def main(input_args=None):
     parser.add_argument(
         "--hidden_dim",
         type=int,
-        default=64,
+        default=128,
         help="Dimensionality of all hidden representations (default: 64)",
     )
     parser.add_argument(

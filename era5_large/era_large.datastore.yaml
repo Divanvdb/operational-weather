@@ -24,18 +24,18 @@ output:
           dims: [grid_index, time]
       val:
         start: 2019-04-01T00:00
-        end: 2019-12-20T00:00
-      test:
-        start: 2019-12-20T03:00
         end: 2019-12-31T21:00
+      test:
+        start: 2020-01-01T00:00
+        end: 2020-12-31T21:00
 
 inputs:
   era_variables:
     path: /teamspace/studios/this_studio/dk-neural-lam/era5_large/era5_100x100.nc
     dims: [time, x, y, pressure_level]
     variables:
-      # - z
-      - t
+      - z
+      # - t
       # - u
       # - v
       - wind_speed
