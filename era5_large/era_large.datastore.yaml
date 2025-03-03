@@ -31,7 +31,7 @@ output:
 
 inputs:
   era_variables:
-    path: /teamspace/studios/this_studio/dk-neural-lam/era5_3h/era_2017_2020_xy.nc
+    path: /teamspace/studios/this_studio/dk-neural-lam/era5_large/era5_100x100.nc
     dims: [time, x, y, pressure_level]
     variables:
       # - z
@@ -54,7 +54,7 @@ inputs:
     target_output_variable: state
 
   era_times:
-    path: /teamspace/studios/this_studio/dk-neural-lam/era5_3h/era_2017_2020_xy.nc
+    path: /teamspace/studios/this_studio/dk-neural-lam/era5_large/era5_100x100.nc
     dims: [time, x, y]
     variables:
       - hour
@@ -73,11 +73,11 @@ inputs:
     target_output_variable: forcing
 
   era_lsm:
-    path: /teamspace/studios/this_studio/dk-neural-lam/era5_3h/era_2017_2020_xy.nc
+    path: /teamspace/studios/this_studio/dk-neural-lam/era5_large/era5_100x100.nc
     dims: [time, x, y, pressure_level]
 
     variables:
-      - lsm
+      - 'null'
 
     dim_mapping:
       grid_index:

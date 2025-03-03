@@ -31,7 +31,7 @@ def main(input_args=None):
     )
     parser.add_argument(
         "--config_path",
-        default='/teamspace/studios/this_studio/dk-neural-lam/era5_3h/config3h.yaml',
+        default='/teamspace/studios/this_studio/dk-neural-lam/era5_large/config_large.yaml',
         type=str,
         help="Path to the configuration for neural-lam",
     )
@@ -53,7 +53,7 @@ def main(input_args=None):
     parser.add_argument(
         "--epochs",
         type=int,
-        default=50,
+        default=35,
         help="upper epoch limit (default: 200)",
     )
     parser.add_argument(
@@ -153,7 +153,7 @@ def main(input_args=None):
     parser.add_argument(
         "--ar_steps_eval",
         type=int,
-        default=6,
+        default=3,
         help="Number of steps to unroll prediction for during evaluation "
         "(default: 10)",
     )
@@ -176,7 +176,7 @@ def main(input_args=None):
     parser.add_argument(
         "--wandb_project",
         type=str,
-        default="neural_lam_3h",
+        default="neural_lam_large",
         help="Wandb project name (default: neural_lam)",
     )
     parser.add_argument(
@@ -202,13 +202,13 @@ def main(input_args=None):
     parser.add_argument(
         "--num_past_forcing_steps",
         type=int,
-        default=2,
+        default=0,
         help="Number of past time steps to use as input for forcing data",
     )
     parser.add_argument(
         "--num_future_forcing_steps",
         type=int,
-        default=1,
+        default=0,
         help="Number of future time steps to use as input for forcing data",
     )
     args = parser.parse_args(input_args)

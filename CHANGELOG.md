@@ -59,3 +59,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [v0.1.7](https://github.com/Divanvdb/dk-neural-lam)
 
 - Added **3h** timestep dataset
+- Added larger dataset with square setup
