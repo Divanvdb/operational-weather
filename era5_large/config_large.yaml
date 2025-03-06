@@ -6,8 +6,8 @@ training:
     __config_class__: ManualStateFeatureWeighting
     weights:
       z850.0hPa: 1.0
-      # t850.0hPa: 0.5
-      # u850.0hPa: 0.5
-      # v850.0hPa: 0.5
+      t850.0hPa: 1.0
+      u850.0hPa: 1.0
+      v850.0hPa: 1.0
       wind_speed850.0hPa: 1.0
 

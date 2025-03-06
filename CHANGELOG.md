@@ -60,3 +60,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added **3h** timestep dataset
 - Added larger dataset with square setup
+
+## [v0.1.8](https://github.com/Divanvdb/dk-neural-lam)
+
+- Altered the dataset to include only `100x100` points
+- `base_graph_model.py` now outputs the **structures** of the *embedding models*

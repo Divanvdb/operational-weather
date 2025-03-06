@@ -88,7 +88,7 @@ def main(input_args=None):
     parser.add_argument(
         "--hidden_dim",
         type=int,
-        default=128,
+        default=64,
         help="Dimensionality of all hidden representations (default: 64)",
     )
     parser.add_argument(

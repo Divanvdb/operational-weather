@@ -49,8 +49,11 @@ class BaseGraphModel(ARModel):
         self.grid_embedder = utils.make_mlp(
             [self.grid_dim] + self.mlp_blueprint_end
         )
+        print(f"Grid embedding MLP: {self.grid_embedder}")
         self.g2m_embedder = utils.make_mlp([g2m_dim] + self.mlp_blueprint_end)
+        print(f"G2M embedding MLP: {self.g2m_embedder}")
         self.m2g_embedder = utils.make_mlp([m2g_dim] + self.mlp_blueprint_end)
+        print(f"M2G embedding MLP: {self.m2g_embedder}")
 
         # GNNs
         # encoder
@@ -63,6 +66,7 @@ class BaseGraphModel(ARModel):
         self.encoding_grid_mlp = utils.make_mlp(
             [args.hidden_dim] + self.mlp_blueprint_end
         )
+        print(f"Grid encoding MLP: {self.encoding_grid_mlp}")
 
         # decoder
         self.m2g_gnn = InteractionNet(
@@ -78,6 +82,7 @@ class BaseGraphModel(ARModel):
             + [self.grid_output_dim],
             layer_norm=False,
         )  # No layer norm on this one
+        print(f"Output mapping MLP: {self.output_map}")
 
     def get_num_mesh(self):
         """
