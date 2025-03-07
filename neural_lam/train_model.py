@@ -31,7 +31,7 @@ def main(input_args=None):
     )
     parser.add_argument(
         "--config_path",
-        default='/teamspace/studios/this_studio/dk-neural-lam/era5_large/config_large.yaml',
+        default='/teamspace/studios/this_studio/dk-neural-lam/era5_med/config_med.yaml',
         type=str,
         help="Path to the configuration for neural-lam",
     )
@@ -53,7 +53,7 @@ def main(input_args=None):
     parser.add_argument(
         "--epochs",
         type=int,
-        default=35,
+        default=55,
         help="upper epoch limit (default: 200)",
     )
     parser.add_argument(
@@ -122,7 +122,7 @@ def main(input_args=None):
     parser.add_argument(
         "--ar_steps_train",
         type=int,
-        default=1,
+        default=4,
         help="Number of steps to unroll prediction for in loss function "
         "(default: 1)",
     )
@@ -153,7 +153,7 @@ def main(input_args=None):
     parser.add_argument(
         "--ar_steps_eval",
         type=int,
-        default=3,
+        default=6,
         help="Number of steps to unroll prediction for during evaluation "
         "(default: 10)",
     )
@@ -176,7 +176,7 @@ def main(input_args=None):
     parser.add_argument(
         "--wandb_project",
         type=str,
-        default="neural_lam_large",
+        default="neural_lam_med",
         help="Wandb project name (default: neural_lam)",
     )
     parser.add_argument(

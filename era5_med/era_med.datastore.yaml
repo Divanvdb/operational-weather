@@ -26,12 +26,12 @@ output:
         start: 2018-01-01T00:00
         end: 2018-05-30T21:00
       test:
-        start: 2018-06-01T00:00
-        end: 2018-06-30T21:00
+        start: 2018-07-01T00:00
+        end: 2018-07-30T21:00
 
 inputs:
   era_variables:
-    path: /teamspace/studios/this_studio/dk-neural-lam/era5_large/era5_100x100.nc
+    path: /teamspace/studios/this_studio/dk-neural-lam/era5_med/era5_80x80.nc
     dims: [time, x, y, pressure_level]
     variables:
       - z
@@ -55,7 +55,7 @@ inputs:
     target_output_variable: state
 
   era_times:
-    path: /teamspace/studios/this_studio/dk-neural-lam/era5_large/era5_100x100.nc
+    path: /teamspace/studios/this_studio/dk-neural-lam/era5_med/era5_80x80.nc
     dims: [time, x, y]
     variables:
       - hour
@@ -74,7 +74,7 @@ inputs:
     target_output_variable: forcing
 
   era_lsm:
-    path: /teamspace/studios/this_studio/dk-neural-lam/era5_large/era5_100x100.nc
+    path: /teamspace/studios/this_studio/dk-neural-lam/era5_med/era5_80x80.nc
     dims: [time, x, y, pressure_level]
 
     variables:

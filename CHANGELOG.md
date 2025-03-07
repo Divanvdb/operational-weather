@@ -65,3 +65,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Altered the dataset to include only `100x100` points
 - `base_graph_model.py` now outputs the **structures** of the *embedding models*
+
+## [v0.1.9](https://github.com/Divanvdb/dk-neural-lam)
+
+- Added a medium-sized `80 x 80` set to ensure the model learns patterns over the region of SA
+- Created new `base_model.py` for testing purposes

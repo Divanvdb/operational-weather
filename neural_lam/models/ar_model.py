@@ -447,7 +447,7 @@ class ARModel(pl.LightningModule):
 
         if self.count == 5:
             print("Outputting")
-            self.output.to_netcdf(f'output_{self.count}x7x49x69.nc')
+            self.output.to_netcdf(f'test_output.nc')
             print("Output complete")
 
     # pylint: disable-next=unused-argument

@@ -1,6 +1,6 @@
 datastore:
   kind: mdp
-  config_path: era_large.datastore.yaml 
+  config_path: era_med.datastore.yaml 
 training:
   state_feature_weighting:
     __config_class__: ManualStateFeatureWeighting
