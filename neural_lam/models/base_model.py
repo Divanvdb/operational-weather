@@ -9,7 +9,7 @@ from ..interaction_net import InteractionNet
 from .ar_model import ARModel
 
 
-class BaseGraphModel(ARModel):
+class BaseModel(ARModel):
     """
     Base (abstract) class for graph-based models building on
     the encode-process-decode idea.
@@ -57,24 +57,24 @@ class BaseGraphModel(ARModel):
 
         # GNNs
         # encoder
-        self.g2m_gnn = InteractionNet(
-            self.g2m_edge_index,
-            args.hidden_dim,
-            hidden_layers=args.hidden_layers,
-            update_edges=False,
-        )
+        # self.g2m_gnn = InteractionNet(
+        #     self.g2m_edge_index,
+        #     args.hidden_dim,
+        #     hidden_layers=args.hidden_layers,
+        #     update_edges=False,
+        # )
         self.encoding_grid_mlp = utils.make_mlp(
             [args.hidden_dim] + self.mlp_blueprint_end
         )
         print(f"Grid encoding MLP: {self.encoding_grid_mlp}")
 
         # decoder
-        self.m2g_gnn = InteractionNet(
-            self.m2g_edge_index,
-            args.hidden_dim,
-            hidden_layers=args.hidden_layers,
-            update_edges=False,
-        )
+        # self.m2g_gnn = InteractionNet(
+        #     self.m2g_edge_index,
+        #     args.hidden_dim,
+        #     hidden_layers=args.hidden_layers,
+        #     update_edges=False,
+        # )
 
         # Output mapping (hidden_dim -> output_dim)
         self.output_map = utils.make_mlp(
@@ -130,7 +130,9 @@ class BaseGraphModel(ARModel):
 
         # Embed all features
         grid_emb = self.grid_embedder(grid_features)  # (B, num_grid_nodes, d_h)
+        print("Grid to Mesh features: ", self.g2m_features)
         g2m_emb = self.g2m_embedder(self.g2m_features)  # (M_g2m, d_h)
+        print("Mesh to Grid features: ", self.m2g_features)
         m2g_emb = self.m2g_embedder(self.m2g_features)  # (M_m2g, d_h)
         mesh_emb = self.embedd_mesh_nodes()
 
@@ -150,7 +152,7 @@ class BaseGraphModel(ARModel):
         )  # (B, num_grid_nodes, d_h)
 
         # Run processor step
-        mesh_rep = self.process_step(mesh_rep)
+        # mesh_rep = self.process_step(mesh_rep)
 
         # Map back from mesh to grid
         m2g_emb_expanded = self.expand_to_batch(m2g_emb, batch_size)

@@ -122,7 +122,7 @@ def main(input_args=None):
     parser.add_argument(
         "--ar_steps_train",
         type=int,
-        default=4,
+        default=1,
         help="Number of steps to unroll prediction for in loss function "
         "(default: 1)",
     )
