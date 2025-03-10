@@ -31,7 +31,7 @@ def main(input_args=None):
     )
     parser.add_argument(
         "--config_path",
-        default='/teamspace/studios/this_studio/dk-neural-lam/era5_med/config_med.yaml',
+        default='/teamspace/studios/this_studio/dk-neural-lam/era_test/config_test.yaml',
         type=str,
         help="Path to the configuration for neural-lam",
     )
@@ -122,14 +122,14 @@ def main(input_args=None):
     parser.add_argument(
         "--ar_steps_train",
         type=int,
-        default=1,
+        default=4,
         help="Number of steps to unroll prediction for in loss function "
         "(default: 1)",
     )
     parser.add_argument(
         "--loss",
         type=str,
-        default="mse",
+        default="mae",
         help="Loss function to use, see metric.py (default: wmse)",
     )
     parser.add_argument(
@@ -211,6 +211,12 @@ def main(input_args=None):
         default=0,
         help="Number of future time steps to use as input for forcing data",
     )
+    parser.add_argument(
+        "--use_cpu",
+        action="store_true",
+        help="If model should be run on CPU (default: False)",
+    )
+
     args = parser.parse_args(input_args)
     args.var_leads_metrics_watch = {
         int(k): v for k, v in json.loads(args.var_leads_metrics_watch).items()
@@ -249,7 +255,7 @@ def main(input_args=None):
     )
 
     # Instantiate model + trainer
-    if torch.cuda.is_available():
+    if torch.cuda.is_available() and not args.use_cpu:
         device_name = "cuda"
         torch.set_float32_matmul_precision(
             "high"

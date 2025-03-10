@@ -12,9 +12,9 @@
 
 # Terminal Commands for Lightning AI
 
-> Creating the datastore: python -m mllam_data_prep /teamspace/studios/this_studio/dk-neural-lam/era5_med/era_med.datastore.yaml
+> Creating the datastore: python -m mllam_data_prep /teamspace/studios/this_studio/dk-neural-lam/era_test/era_test.datastore.yaml
 
-> Creating the graph: python -m neural_lam.create_graph --config_path /teamspace/studios/this_studio/dk-neural-lam/era5_med/config_med.yaml --name multiscale
+> Creating the graph: python -m neural_lam.create_graph --config_path /teamspace/studios/this_studio/dk-neural-lam/era_test/config_test.yaml --name multiscale
 
 > Plot the graph: python -m neural_lam.plot_graph --datastore_config_path /teamspace/studios/this_studio/dk-neural-lam/era5_large/config_large.yaml --graph multiscale_D1
 
@@ -26,4 +26,4 @@ python -m neural_lam.train_model --load /teamspace/studios/this_studio/dk-neural
 
 > Validating a model using **pl.Trainer**: 
 
-python -m neural_lam.train_model --num_workers 4 --eval test --batch_size 1 --ar_steps_eval 12 --load /teamspace/studios/this_studio/dk-neural-lam/saved_models/train-base_model-4x128-03_07_13-9405/min_val_loss.ckpt
+python -m neural_lam.train_model --num_workers 4 --eval test --batch_size 1 --ar_steps_eval 12 --load /teamspace/studios/this_studio/dk-neural-lam/saved_models/train-graph_lam-4x64-03_10_08-0735/min_val_loss.ckpt

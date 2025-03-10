@@ -731,7 +731,7 @@ class ARModel(pl.LightningModule):
             plt.close("all")  # Close all figs
 
     def on_test_epoch_end(self):
-        self.output.to_netcdf(f'output_lenx7x49x69.nc')
+        self.output.to_netcdf(f'final_output.nc')
 
     # def on_test_epoch_end(self):
     #     """
