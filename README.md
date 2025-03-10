@@ -1,5 +1,10 @@
 # Implementation of Neural LAM by Divan van der Bank - Creating SA-GNN
 
+Training Notes:
+
+- Trained on 80x80 with full train-val set until convergence with MSE
+- Finetuned for 4-step prediction with MAE
+
 ## Wind Speed Forecasting with Limited-Area AI Model
 
 This project develops a **Graph Neural Network (GNN)-based wind speed forecasting model** using a limited-area **Artificial Intelligence Weather Prediction (AIWP)** approach. Designed to tackle wind power variability challenges, the model will leverage AIWP advancements to match the skill of traditional **Numerical Weather Prediction (NWP)** and leading AIWP models, while requiring *significantly less computational power*. The model will be validated on a custom benchmarking platform, aiming to achieve performance comparable to state-of-the-art methods for wind speed forecasting in South Africa (2020 data). A case study will demonstrate its operational potential at a wind farm, providing accurate, cost-effective forecasts to support renewable energy deployment and contribute to a sustainable energy future.
