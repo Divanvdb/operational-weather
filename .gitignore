@@ -1,13 +1,2 @@
-data/era5_2010_2020_xy.nc
-wandb/
-__pycache__/
-saved_models/
-model_settings.yaml
-predictions.ipynb
+
 *.nc
-debug.py
-neural_lam/test_dataloader.py
-projections.ipynb
-*.pt
-neural_lam/plot_progress.py
-*.html

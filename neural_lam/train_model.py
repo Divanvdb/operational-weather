@@ -31,7 +31,7 @@ def main(input_args=None):
     )
     parser.add_argument(
         "--config_path",
-        default='/teamspace/studios/this_studio/dk-neural-lam/era_test/config_test.yaml',
+        default='C:\github\operational-weather\era_test\config_test.yaml',
         type=str,
         help="Path to the configuration for neural-lam",
     )
@@ -47,17 +47,17 @@ def main(input_args=None):
     parser.add_argument(
         "--num_workers",
         type=int,
-        default=16,
+        default=4,
         help="Number of workers in data loader (default: 4)",
     )
     parser.add_argument(
         "--epochs",
         type=int,
-        default=55,
+        default=1,
         help="upper epoch limit (default: 200)",
     )
     parser.add_argument(
-        "--batch_size", type=int, default=16, help="batch size (default: 4)"
+        "--batch_size", type=int, default=1, help="batch size (default: 4)"
     )
     parser.add_argument(
         "--load",
@@ -153,7 +153,7 @@ def main(input_args=None):
     parser.add_argument(
         "--ar_steps_eval",
         type=int,
-        default=6,
+        default=12,
         help="Number of steps to unroll prediction for during evaluation "
         "(default: 10)",
     )

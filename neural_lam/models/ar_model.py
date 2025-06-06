@@ -196,11 +196,17 @@ class ARModel(pl.LightningModule):
         time = np.array(time.cpu(), dtype="datetime64[ns]")
         if use_numpy:
             da = weather_dataset.create_dataarray_from_tensor(
-                tensor=tensor.cpu().numpy(), time=time, category=category, use_numpy=use_numpy
+                tensor=tensor.cpu().numpy(),
+                time=time,
+                category=category,
+                use_numpy=use_numpy,
             )
         else:
             da = weather_dataset.create_dataarray_from_tensor(
-                tensor=tensor.detach().numpy(), time=time, category=category, use_numpy=use_numpy
+                tensor=tensor.detach().numpy(),
+                time=time,
+                category=category,
+                use_numpy=use_numpy,
             )
         return da
 
@@ -258,8 +264,7 @@ class ARModel(pl.LightningModule):
 
             # Overwrite border with true state
             new_state = (
-                self.boundary_mask * border_state
-                + self.interior_mask * pred_state
+                self.boundary_mask * border_state + self.interior_mask * pred_state
             )
 
             prediction_list.append(new_state)
@@ -308,9 +313,7 @@ class ARModel(pl.LightningModule):
 
         # Compute loss
         batch_loss = torch.mean(
-            self.loss(
-                prediction, target, pred_std, mask=self.interior_mask_bool
-            )
+            self.loss(prediction, target, pred_std, mask=self.interior_mask_bool)
         )  # mean over unrolled times and batch
 
         log_dict = {"train_loss": batch_loss}
@@ -346,9 +349,7 @@ class ARModel(pl.LightningModule):
         prediction, target, pred_std, _ = self.common_step(batch)
 
         time_step_loss = torch.mean(
-            self.loss(
-                prediction, target, pred_std, mask=self.interior_mask_bool
-            ),
+            self.loss(prediction, target, pred_std, mask=self.interior_mask_bool),
             dim=0,
         )  # (time_steps-1)
         mean_loss = torch.mean(time_step_loss)
@@ -376,7 +377,7 @@ class ARModel(pl.LightningModule):
             mask=self.interior_mask_bool,
             sum_vars=False,
         )  # (B, pred_steps, d_f)
-        self.val_metrics["mse"].append(entry_mses) # Shape of [batch, steps, variables]
+        self.val_metrics["mse"].append(entry_mses)  # Shape of [batch, steps, variables]
 
     def on_validation_epoch_end(self):
         """
@@ -389,29 +390,62 @@ class ARModel(pl.LightningModule):
         for metric_list in self.val_metrics.values():
             metric_list.clear()
 
-
     def test_step(self, batch, batch_idx):
         prediction, target, _, batch_times = self.common_step(batch)
-        
+
         predictions = self._create_dataarray_from_tensor(
-            tensor=prediction[0], time=batch_times[0], split='train', category='state', use_numpy=False
+            tensor=prediction[0],
+            time=batch_times[0],
+            split="train",
+            category="state",
+            use_numpy=self.args.use_numpy,
         )
         targets = self._create_dataarray_from_tensor(
-            tensor=target[0], time=batch_times[0], split='train', category='state', use_numpy=False
+            tensor=target[0],
+            time=batch_times[0],
+            split="train",
+            category="state",
+            use_numpy=self.args.use_numpy,
         )
 
-        predictions = predictions.sel(state_feature='wind_speed850.0hPa').drop_vars('state_feature')
-        targets = targets.sel(state_feature='wind_speed850.0hPa').drop_vars('state_feature')
+        # predictions = predictions.sel(state_feature='wind_speed850.0hPa').drop_vars('state_feature')
+        # targets = targets.sel(state_feature='wind_speed850.0hPa').drop_vars('state_feature')
+        predictions = predictions.sel(state_feature=["u850.0hPa", "v850.0hPa"])
+        targets = targets.sel(state_feature=["u850.0hPa", "v850.0hPa"])
 
         # Unstack grid coordinates
         predictions = self._datastore.unstack_grid_coords(predictions)
         targets = self._datastore.unstack_grid_coords(targets)
 
-        # Unstandardise the predictions and targets
-        wspd_meand = self.da_state_mean.sel(state_feature='wind_speed850.0hPa').values
-        wspd_stdd = self.da_state_std.sel(state_feature='wind_speed850.0hPa').values
-        predictions = predictions * wspd_stdd + wspd_meand
-        targets = targets * wspd_stdd + wspd_meand
+        # Unstandardize the u and v components
+        u_mean = self.da_state_mean.sel(state_feature="u850.0hPa").values
+        v_mean = self.da_state_mean.sel(state_feature="v850.0hPa").values
+        u_std = self.da_state_std.sel(state_feature="u850.0hPa").values
+        v_std = self.da_state_std.sel(state_feature="v850.0hPa").values
+
+        predictions_u = (
+            predictions.sel(state_feature="u850.0hPa").drop_vars("state_feature")
+            * u_std
+            + u_mean
+        )
+        predictions_v = (
+            predictions.sel(state_feature="v850.0hPa").drop_vars("state_feature")
+            * v_std
+            + v_mean
+        )
+        targets_u = (
+            targets.sel(state_feature="u850.0hPa").drop_vars("state_feature") * u_std
+            + u_mean
+        )
+        targets_v = (
+            targets.sel(state_feature="v850.0hPa").drop_vars("state_feature") * v_std
+            + v_mean
+        )
+
+        # Compute wind speed: sqrt(u^2 + v^2)
+        pred_wind_speed = np.sqrt(predictions_u**2 + predictions_v**2)
+        target_wind_speed = np.sqrt(targets_u**2 + targets_v**2)
+
         self.count += 1
 
         if self.catch:
@@ -419,13 +453,25 @@ class ARModel(pl.LightningModule):
             self.output = xr.Dataset()
 
             # Assign coordinates
-            self.output.coords['time'] = predictions['time'][0].values  # Copy the time coordinate from the input
-            self.output.coords['prediction_timedelta'] = ('prediction_timedelta', np.arange(0, 12))  # Correct dim name
-            self.output.coords['latitude'] = ('latitude', predictions['y'].values)  # Explicitly assign dimension
-            self.output.coords['longitude'] = ('longitude', predictions['x'].values)  # Explicitly assign dimension
+            self.output.coords["time"] = predictions["time"][
+                0
+            ].values  # Copy the time coordinate from input
+            self.output.coords["prediction_timedelta"] = (
+                "prediction_timedelta",
+                np.arange(0, 12),
+            )
+            self.output.coords["latitude"] = ("latitude", predictions["y"].values)
+            self.output.coords["longitude"] = ("longitude", predictions["x"].values)
 
-            self.output['wind_speed'] = (('prediction_timedelta', 'longitude', 'latitude'), predictions.values)
-            self.output['target'] = (('prediction_timedelta', 'longitude', 'latitude'), targets.values)
+            # Assign wind speed output
+            self.output["wind_speed"] = (
+                ("prediction_timedelta", "longitude", "latitude"),
+                pred_wind_speed.values,
+            )
+            self.output["target"] = (
+                ("prediction_timedelta", "longitude", "latitude"),
+                target_wind_speed.values,
+            )
 
             self.catch = False
 
@@ -434,103 +480,31 @@ class ARModel(pl.LightningModule):
             temp = xr.Dataset()
 
             # Assign coordinates
-            temp.coords['time'] = predictions['time'][0].values  # Copy the time coordinate from the input
-            temp.coords['prediction_timedelta'] = ('prediction_timedelta', np.arange(0, 12))  # Correct dim name
-            temp.coords['latitude'] = ('latitude', predictions['y'].values)  # Explicitly assign dimension
-            temp.coords['longitude'] = ('longitude', predictions['x'].values)  # Explicitly assign dimension
-            
-            temp['wind_speed'] = (('prediction_timedelta', 'longitude', 'latitude'), predictions.values)
-            temp['target'] = (('prediction_timedelta', 'longitude', 'latitude'), targets.values)
+            temp.coords["time"] = predictions["time"][0].values
+            temp.coords["prediction_timedelta"] = (
+                "prediction_timedelta",
+                np.arange(0, 12),
+            )
+            temp.coords["latitude"] = ("latitude", predictions["y"].values)
+            temp.coords["longitude"] = ("longitude", predictions["x"].values)
+
+            # Assign wind speed output
+            temp["wind_speed"] = (
+                ("prediction_timedelta", "longitude", "latitude"),
+                pred_wind_speed.values,
+            )
+            temp["target"] = (
+                ("prediction_timedelta", "longitude", "latitude"),
+                target_wind_speed.values,
+            )
 
             # Concatenate the temp dataset to the output dataset
-            self.output = xr.concat([self.output, temp], dim='time')
+            self.output = xr.concat([self.output, temp], dim="time")
 
-        if self.count == 5:
-            print("Outputting")
-            self.output.to_netcdf(f'test_output.nc')
-            print("Output complete")
-
-    # pylint: disable-next=unused-argument
-    # def test_step(self, batch, batch_idx):
-    #     """
-    #     Run test on single batch
-    #     """
-    #     # TODO Here batch_times can be used for plotting routines
-    #     prediction, target, pred_std, batch_times = self.common_step(batch)
-    #     # prediction: (B, pred_steps, num_grid_nodes, d_f) pred_std: (B,
-    #     # pred_steps, num_grid_nodes, d_f) or (d_f,)
-
-    #     time_step_loss = torch.mean(
-    #         self.loss(
-    #             prediction, target, pred_std, mask=self.interior_mask_bool
-    #         ),
-    #         dim=0,
-    #     )  # (time_steps-1,)
-    #     mean_loss = torch.mean(time_step_loss)
-
-    #     # Log loss per time step forward and mean
-    #     test_log_dict = {
-    #         f"test_loss_unroll{step}": time_step_loss[step - 1]
-    #         for step in self.args.val_steps_to_log
-    #     }
-    #     test_log_dict["test_mean_loss"] = mean_loss
-
-    #     self.log_dict(
-    #         test_log_dict,
-    #         on_step=False,
-    #         on_epoch=True,
-    #         sync_dist=True,
-    #         batch_size=batch[0].shape[0],
-    #     )
-
-    #     # Compute all evaluation metrics for error maps Note: explicitly list
-    #     # metrics here, as test_metrics can contain additional ones, computed
-    #     # differently, but that should be aggregated on_test_epoch_end
-    #     for metric_name in ("mse", "mae"):
-    #         metric_func = metrics.get_metric(metric_name)
-    #         batch_metric_vals = metric_func(
-    #             prediction,
-    #             target,
-    #             pred_std,
-    #             mask=self.interior_mask_bool,
-    #             sum_vars=False,
-    #         )  # (B, pred_steps, d_f)
-    #         self.test_metrics[metric_name].append(batch_metric_vals)
-
-    #     if self.output_std:
-    #         # Store output std. per variable, spatially averaged
-    #         mean_pred_std = torch.mean(
-    #             pred_std[..., self.interior_mask_bool, :], dim=-2
-    #         )  # (B, pred_steps, d_f)
-    #         self.test_metrics["output_std"].append(mean_pred_std)
-
-    #     # Save per-sample spatial loss for specific times
-    #     spatial_loss = self.loss(
-    #         prediction, target, pred_std, average_grid=False
-    #     )  # (B, pred_steps, num_grid_nodes)
-    #     log_spatial_losses = spatial_loss[
-    #         :, [step - 1 for step in self.args.val_steps_to_log]
-    #     ]
-    #     self.spatial_loss_maps.append(log_spatial_losses)
-    #     # (B, N_log, num_grid_nodes)
-
-    #     # Plot example predictions (on rank 0 only)
-    #     if (
-    #         self.trainer.is_global_zero
-    #         and self.plotted_examples < self.n_example_pred
-    #     ):
-    #         # Need to plot more example predictions
-    #         n_additional_examples = min(
-    #             prediction.shape[0],
-    #             self.n_example_pred - self.plotted_examples,
-    #         )
-
-    #         self.plot_examples(
-    #             batch,
-    #             n_additional_examples,
-    #             prediction=prediction,
-    #             split="test",
-    #         )
+        # if self.count == 5:
+        #     print("Outputting")
+        #     self.output.to_netcdf("test_output.nc")
+        #     print("Output complete")
 
     def plot_examples(self, batch, n_examples, split, prediction=None):
         """
@@ -626,16 +600,12 @@ class ARModel(pl.LightningModule):
                         )
                     }
                 )
-                plt.close(
-                    "all"
-                )  # Close all figs for this time step, saves memory
+                plt.close("all")  # Close all figs for this time step, saves memory
 
             # Save pred and target as .pt files
             torch.save(
                 pred_slice.cpu(),
-                os.path.join(
-                    wandb.run.dir, f"example_pred_{self.plotted_examples}.pt"
-                ),
+                os.path.join(wandb.run.dir, f"example_pred_{self.plotted_examples}.pt"),
             )
             torch.save(
                 target_slice.cpu(),
@@ -665,9 +635,7 @@ class ARModel(pl.LightningModule):
 
         if prefix == "test":
             # Save pdf
-            metric_fig.savefig(
-                os.path.join(wandb.run.dir, f"{full_log_name}.pdf")
-            )
+            metric_fig.savefig(os.path.join(wandb.run.dir, f"{full_log_name}.pdf"))
             # Save errors also as csv
             np.savetxt(
                 os.path.join(wandb.run.dir, f"{full_log_name}.csv"),
@@ -694,7 +662,7 @@ class ARModel(pl.LightningModule):
             with step-evals.
         prefix: string, prefix to use for logging
         """
-        #TODO: Errors due to shape mismathes in the metrics_dict tensors
+        # TODO: Errors due to shape mismathes in the metrics_dict tensors
         log_dict = {}
         for metric_name, metric_val_list in metrics_dict.items():
             # print(f"{prefix} {metric_name} list length: {len(metric_val_list)}")
@@ -706,7 +674,6 @@ class ARModel(pl.LightningModule):
             # print(f"{prefix} {metric_name} tensor shape: {metric_tensor.shape}")
 
             if self.trainer.is_global_zero:
-                
                 metric_tensor_averaged = torch.mean(metric_tensor, dim=0)
                 # (pred_steps, d_f)
 
@@ -721,9 +688,7 @@ class ARModel(pl.LightningModule):
                 metric_rescaled = metric_tensor_averaged * self.state_std
                 # (pred_steps, d_f)
                 log_dict.update(
-                    self.create_metric_log_dict(
-                        metric_rescaled, prefix, metric_name
-                    )
+                    self.create_metric_log_dict(metric_rescaled, prefix, metric_name)
                 )
 
         if self.trainer.is_global_zero and not self.trainer.sanity_checking:
@@ -731,59 +696,8 @@ class ARModel(pl.LightningModule):
             plt.close("all")  # Close all figs
 
     def on_test_epoch_end(self):
-        self.output.to_netcdf(f'final_output.nc')
-
-    # def on_test_epoch_end(self):
-    #     """
-    #     Compute test metrics and make plots at the end of test epoch. Will
-    #     gather stored tensors and perform plotting and logging on rank 0.
-    #     """
-    #     # Create error maps for all test metrics
-    #     self.aggregate_and_plot_metrics(self.test_metrics, prefix="test")
-
-    #     # Plot spatial loss maps
-    #     spatial_loss_tensor = self.all_gather_cat(
-    #         torch.cat(self.spatial_loss_maps, dim=0)
-    #     )  # (N_test, N_log, num_grid_nodes)
-    #     if self.trainer.is_global_zero:
-    #         mean_spatial_loss = torch.mean(
-    #             spatial_loss_tensor, dim=0
-    #         )  # (N_log, num_grid_nodes)
-
-    #         loss_map_figs = [
-    #             vis.plot_spatial_error(
-    #                 error=loss_map,
-    #                 datastore=self._datastore,
-    #                 title=f"Test loss, t={t_i} "
-    #                 f"({self._datastore.step_length * t_i} h)",
-    #             )
-    #             for t_i, loss_map in zip(
-    #                 self.args.val_steps_to_log, mean_spatial_loss
-    #             )
-    #         ]
-
-    #         # log all to same wandb key, sequentially
-    #         for fig in loss_map_figs:
-    #             wandb.log({"test_loss": wandb.Image(fig)})
-
-    #         # also make without title and save as pdf
-    #         pdf_loss_map_figs = [
-    #             vis.plot_spatial_error(
-    #                 error=loss_map, datastore=self._datastore
-    #             )
-    #             for loss_map in mean_spatial_loss
-    #         ]
-    #         pdf_loss_maps_dir = os.path.join(wandb.run.dir, "spatial_loss_maps")
-    #         os.makedirs(pdf_loss_maps_dir, exist_ok=True)
-    #         for t_i, fig in zip(self.args.val_steps_to_log, pdf_loss_map_figs):
-    #             fig.savefig(os.path.join(pdf_loss_maps_dir, f"loss_t{t_i}.pdf"))
-    #         # save mean spatial loss as .pt file also
-    #         torch.save(
-    #             mean_spatial_loss.cpu(),
-    #             os.path.join(wandb.run.dir, "mean_spatial_loss.pt"),
-    #         )
-
-    #     self.spatial_loss_maps.clear()
+        print('Outputting full output')
+        self.output.to_netcdf("final_output.nc")
 
     def on_load_checkpoint(self, checkpoint):
         """

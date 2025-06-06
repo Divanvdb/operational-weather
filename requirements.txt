@@ -14,3 +14,4 @@ cartopy
 mllam_data_prep
 parse
 wandb
+scipy
