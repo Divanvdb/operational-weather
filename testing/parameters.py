@@ -11,5 +11,5 @@ class InferenceParameters:
 
     yaml_path: str = 'C:\github\operational-weather\era_test\era_test.datastore.yaml'
 
-    steps: int = 6
+    steps: int = 15
     intervals: int = 3

@@ -15,8 +15,8 @@ if __name__ == "__main__":
     parameters = InferenceParameters()
 
     ds = xr.open_dataset(parameters.use_file)
-    training_dates = ds.time.values[[0, -(parameters.steps - 1)]]
-    target_dates = ds.time.values[[-parameters.steps, -1]]
+    training_dates = ds.time.values[[0, -parameters.steps - 2]]
+    target_dates = ds.time.values[[-parameters.steps - 1, -1]]
 
 
     config_path = parameters.datastore_config_path

@@ -154,7 +154,7 @@ def main(input_args=None):
         "--ar_steps_eval",
         type=int,
         default=12,
-        help="Number of steps to unroll prediction for during evaluation "
+        help="Number of steps to unroll prediction for during evaluation"
         "(default: 10)",
     )
     parser.add_argument(
@@ -222,6 +222,7 @@ def main(input_args=None):
         int(k): v for k, v in json.loads(args.var_leads_metrics_watch).items()
     }
 
+    print(args)
     # Asserts for arguments
     assert (
         args.config_path is not None

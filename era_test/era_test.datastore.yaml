@@ -9,7 +9,7 @@ output:
   coord_ranges:
     time:
       start: 2020-01-01T00:00
-      end: 2020-10-31T21:00
+      end: 2020-12-31T21:00
       step: PT3H
   chunking:
     time: 1
@@ -18,20 +18,20 @@ output:
     splits:
       train:
         start: 2020-01-01T00:00
-        end: 2020-10-31T09:00
+        end: 2020-10-31T21:00
         compute_statistics:
           ops: [mean, std, diff_mean, diff_std]
           dims: [grid_index, time]
       val:
-        start: 2019-10-02T00:00
-        end: 2019-10-02T21:00
+        start: 2019-11-01T00:00
+        end: 2019-11-02T21:00
       test:
-        start: 2020-10-31T06:00
-        end: 2020-10-31T21:00
+        start: 2020-11-03T00:00
+        end: 2020-11-04T21:00
 
 inputs:
   era_variables:
-    path: C:\github\operational-weather\era_test\era_current.nc
+    path: C:\github\operational-weather\era_test\sagnn_2020.nc
     dims: [time, x, y, pressure_level]
     variables:
       - u
@@ -51,7 +51,7 @@ inputs:
     target_output_variable: state
 
   era_times:
-    path: C:\github\operational-weather\era_test\era_current.nc
+    path: C:\github\operational-weather\era_test\sagnn_2020.nc
     dims: [time, x, y]
     variables:
       - hour
@@ -70,7 +70,7 @@ inputs:
     target_output_variable: forcing
 
   era_lsm:
-    path: C:\github\operational-weather\era_test\era_current.nc
+    path: C:\github\operational-weather\era_test\sagnn_2020.nc
     dims: [time, x, y, pressure_level]
 
     variables:

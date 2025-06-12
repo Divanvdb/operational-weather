@@ -71,6 +71,8 @@ def revert_to_initial_dataset(parameters: InferenceParameters) -> None:
 if __name__ == "__main__":
     params = InferenceParameters()
 
+    revert_to_initial_dataset(params)
+
     update_use_dataset_dataset(params)
 
     use_set = xr.open_dataset(params.use_file)
