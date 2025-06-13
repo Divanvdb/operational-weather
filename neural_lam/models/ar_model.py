@@ -691,9 +691,12 @@ class ARModel(pl.LightningModule):
             wandb.log(log_dict)  # Log all
             plt.close("all")  # Close all figs
 
-    def on_test_epoch_end(self):
+    def on_test_epoch_end(self) -> xr.Dataset:
         print('Outputting full output')
-        self.output.to_netcdf("output/final_output.nc")
+        # self.output.to_netcdf("output/final_output.nc")
+
+        return self.output
+
 
     def on_load_checkpoint(self, checkpoint):
         """

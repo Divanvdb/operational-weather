@@ -11,9 +11,9 @@ class InferenceParameters:
 
     args_path: str = 'C:/github/operational-weather/testing/training_params.yaml'
 
-    add_day: bool = True
+    add_step: bool = True
 
-    restore_original_datasets: bool = False
+    revert_original_datasets: bool = False
 
     steps: int = 12
     intervals: int = 3

@@ -1,3 +1,4 @@
+
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 import numpy as np
@@ -72,7 +73,7 @@ def plot_example(
 
 
 if __name__ == "__main__":
-    ds = xr.open_dataset('final_output.nc')
+    ds = xr.open_dataset('forecasted_weather.nc')
     pred = ds["wind_speed"]
     actual = ds["target"]
 
