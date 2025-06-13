@@ -8,7 +8,7 @@ seed: 42
 num_workers: 4
 epochs: 1
 batch_size: 1
-load: null   # or specify a checkpoint path, e.g. "checkpoints/model.pt"
+load: "C:\\github\\operational-weather\\model_weights\\min_val_loss.ckpt"   # or specify a checkpoint path, e.g. "checkpoints/model.pt"
 restore_opt: false
 precision: 32
 

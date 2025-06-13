@@ -7,16 +7,30 @@ import mllam_data_prep as mdp
 
 import xarray as xr
 
+from dataset_utils import update_use_dataset_dataset, add_step_to_current_dataset, revert_to_initial_dataset
+
 from parameters import InferenceParameters
 
 
-if __name__ == "__main__":
+def create_datastore(parameters: InferenceParameters()):
 
-    parameters = InferenceParameters()
+
+    if parameters.add_day:
+        add_step_to_current_dataset(parameters)
+
+    if parameters.restore_original_datasets:
+        revert_to_initial_dataset(parameters)
+
+    update_use_dataset_dataset(parameters)
+    print('Updated Dataset')
+
 
     ds = xr.open_dataset(parameters.use_file)
-    training_dates = ds.time.values[[0, -parameters.steps - 2]]
-    target_dates = ds.time.values[[-parameters.steps - 1, -1]]
+    print(f'Opening file with {len(ds.time.values)} entries')
+
+
+    training_dates = ds.time.values[[0, -parameters.steps - 4]]
+    target_dates = ds.time.values[[-parameters.steps - 3, -1]]
 
 
     config_path = parameters.datastore_config_path
@@ -65,3 +79,7 @@ if __name__ == "__main__":
 
     print('Datastore added successfully')
 
+
+if __name__ == "__main__":
+    params = InferenceParameters()
+    create_datastore(params)
