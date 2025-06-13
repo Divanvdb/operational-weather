@@ -501,10 +501,6 @@ class ARModel(pl.LightningModule):
             # Concatenate the temp dataset to the output dataset
             self.output = xr.concat([self.output, temp], dim="time")
 
-        # if self.count == 5:
-        #     print("Outputting")
-        #     self.output.to_netcdf("test_output.nc")
-        #     print("Output complete")
 
     def plot_examples(self, batch, n_examples, split, prediction=None):
         """
@@ -697,7 +693,7 @@ class ARModel(pl.LightningModule):
 
     def on_test_epoch_end(self):
         print('Outputting full output')
-        self.output.to_netcdf("final_output.nc")
+        self.output.to_netcdf("output/final_output.nc")
 
     def on_load_checkpoint(self, checkpoint):
         """

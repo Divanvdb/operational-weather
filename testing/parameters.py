@@ -9,7 +9,8 @@ class InferenceParameters:
     datastore_config_path: str = "C:\github\operational-weather\era_test\era_test.datastore.yaml"
     datastore_path: str = 'C:\github\operational-weather\era_test\era_test.datastore.zarr'
 
-    yaml_path: str = 'C:\github\operational-weather\era_test\era_test.datastore.yaml'
+    args_path: str = 'C:/github/operational-weather/testing/training_params.yaml'
 
     steps: int = 15
     intervals: int = 3
+

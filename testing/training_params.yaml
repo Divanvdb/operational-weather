@@ -1,0 +1,46 @@
+# Config for training and evaluating NeurWP models for LAM
+
+config_path: "C:\\github\\operational-weather\\era_test\\config_test.yaml"
+
+# General settings
+model: "graph_lam"
+seed: 42
+num_workers: 4
+epochs: 1
+batch_size: 1
+load: null   # or specify a checkpoint path, e.g. "checkpoints/model.pt"
+restore_opt: false
+precision: 32
+
+# Model architecture
+graph: "multiscale"
+hidden_dim: 64
+hidden_layers: 1
+processor_layers: 4
+mesh_aggr: "sum"
+output_std: false
+
+# Training options
+ar_steps_train: 4
+loss: "mae"
+lr: 0.001
+val_interval: 1
+
+# Evaluation options
+eval: null   # or "val" or "test"
+ar_steps_eval: 12
+n_example_pred: 0
+use_numpy: false
+
+# Logger settings
+wandb_project: "neural_lam_med"
+val_steps_to_log: [1, 2, 3, 4, 5, 6, 7]
+metrics_watch: []   # Example: ["val_rmse", "val_mae"]
+var_leads_metrics_watch: "{}"   # Example: '{"1": [1, 2], "3": [3, 4]}'
+
+# Forcing data settings
+num_past_forcing_steps: 0
+num_future_forcing_steps: 0
+
+# System settings
+use_cpu: false
